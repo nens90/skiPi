@@ -41,7 +41,7 @@ yayay ayyayayy y
     scons
     cd python
     sudo python setup.py install
-    # test
+    # test that neopixel works
     sudo python examples/strandtest.py
     
 ### skiPi ###  
@@ -49,6 +49,7 @@ yayay ayyayayy y
     cd ~/
     git clone https://github.com/nens90/skiPi.git
     cd skiPi
-    ./skipi.py
+    # Run the awesome app!
+    sudo python skipi.py
 
 ## Something else
