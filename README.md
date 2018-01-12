@@ -31,7 +31,7 @@ yayay ayyayayy y
     cd rpi_ws281x
     scons
     cd python
-    sudo python setup.py install
+    sudo python3 setup.py install
     cd ~/
     git clone https://github.com/nens90/skiPi.git
     cd skiPi
