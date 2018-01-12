@@ -9,7 +9,7 @@ LED solution for Raspberry Pi ski holiday.
 yayay ayyayayy y
 
 
-# Usefull stuff
+## Usefull stuff
 
 * [LED strip on aliexpress](https://www.aliexpress.com/item/WS2811-led-strip-5m-150-Pixels-ws2811-ic-DC-12V-led-strip-Addressable-Digital-5050-RGB/32830405129.html?spm=a2g0s.9042311.0.0.6FlhxP)
 * [Some guide](https://learn.adafruit.com/neopixels-on-raspberry-pi?view=all)
@@ -18,7 +18,7 @@ yayay ayyayayy y
 * [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2811.pdf)
 
 
-# Getting Started  
+## Getting Started  
 
     sudo apt-get update
     sudo apt-get upgrade
@@ -36,4 +36,4 @@ yayay ayyayayy y
     ./skipi.py
 
 
-# Something else
+## Something else
