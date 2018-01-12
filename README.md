@@ -20,22 +20,35 @@ yayay ayyayayy y
 
 ## Getting Started  
 
+### Setup ###  
+
     sudo apt-get update
     sudo apt-get upgrade
     sudo shutdown -r now
-    # Set host name
+    # Set hostname
+    sudo raspi-config
+    
+### Get packages ###  
+
     sudo apt-get install python3-pip
     sudo apt-get install build-essential python-dev git scons swig
+    
+### Neopixel lib stuff ###  
+
     cd ~/
     git clone https://github.com/jgarff/rpi_ws281x.git
     cd rpi_ws281x
     scons
     cd python
-    sudo python3 setup.py install
+    sudo python setup.py install
+    # test
+    sudo python examples/strandtest.py
+    
+### skiPi ###  
+
     cd ~/
     git clone https://github.com/nens90/skiPi.git
     cd skiPi
     ./skipi.py
-
 
 ## Something else
