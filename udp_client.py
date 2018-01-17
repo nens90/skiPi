@@ -14,4 +14,4 @@ sock = socket.socket(socket.AF_INET, # Internet
 if(len(MESSAGE) < MSG_MAX_LEN):
     sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 else:
-    print("MESSAGE too long. Length: ", len(MESSAGE))
+    print "MESSAGE too long. Length: " len(MESSAGE)
