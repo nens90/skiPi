@@ -178,7 +178,7 @@ def nwk_thread(threadname):
             data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
             if data:
                 led_mode = int(data)
-                led_event.set()
+                #led_event.set()
                 print "Data: ", led_mode
                 
 
