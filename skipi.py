@@ -50,9 +50,9 @@ def colorWipe(strip, color, wait_ms=50):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
-        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
+            led_event.clear()
             return
 
 def theaterChase(strip, color, wait_ms=50, iterations=10):
@@ -62,9 +62,9 @@ def theaterChase(strip, color, wait_ms=50, iterations=10):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, color)
             strip.show()
-            time.sleep(0.001)
             led_event.wait(wait_ms/1000.0)
             if (led_event.is_set()):
+                led_event.clear()
                 return
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, 0)
@@ -86,9 +86,9 @@ def rainbow(strip, wait_ms=20, iterations=1):
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, wheel((i+j) & 255))
         strip.show()
-        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
+            led_event.clear()
             return
 
 def rainbowCycle(strip, wait_ms=20, iterations=5):
@@ -97,9 +97,9 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
-        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
+            led_event.clear()
             return
 
 def theaterChaseRainbow(strip, wait_ms=50):
@@ -109,9 +109,9 @@ def theaterChaseRainbow(strip, wait_ms=50):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, wheel((i+j) % 255))
             strip.show()
-            time.sleep(0.001)
             led_event.wait(wait_ms/1000.0)
             if (led_event.is_set()):
+                led_event.clear()
                 return
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, 0)
@@ -164,7 +164,6 @@ def led_thread(threadname):
             colorWipe(strip, Color(0,0,0))
         else:
             theaterChaseRainbow(strip)
-        time.sleep(0.02)
     colorWipe(strip, Color(0,0,0))
     
     
