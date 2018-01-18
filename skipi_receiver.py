@@ -32,22 +32,18 @@ with open(PID_FILE, 'r') as f:
 print "Receiver - Have pid: ", str(os.getpid())
 print "Receiver - Got pid: ", skipi_pid
 
-sock.listen(5)
-inputs = [ sock ]
-outputs = [ ]
 
 while os.path.isfile(PID_FILE):
-    readable, writable, exceptional = select.select(inputs, outputs, inputs)
-    for s in readable:
-        if s is sock:
-            data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
-            if data:
-                with open(LED_MODE_FILE, 'w',0) as fd:
-                    fd.write(data)
-                    fd.write('\n')
-                    fd.flush()
-                    fd.close()
-                    time.sleep(5)
-                    os.kill(skipi_pid, signal.SIGUSR1)
-                    print "Receiver - Got data: ", data
+    ready = select.select([sock], [], [], 1) # 1 timeout
+    if ready[0]:
+        data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
+        if data:
+            with open(LED_MODE_FILE, 'w',0) as fd:
+                fd.write(data)
+                fd.write('\n')
+                fd.flush()
+                fd.close()
+                time.sleep(5)
+                os.kill(skipi_pid, signal.SIGUSR1)
+                print "Receiver - Got data: ", data
     print "test"
