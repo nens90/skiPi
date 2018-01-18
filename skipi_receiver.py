@@ -26,6 +26,7 @@ time.sleep(10) # Wait for skipi.py to create a file with pid.
 with open(PID_FILE, 'r') as f:
     skipi_pid =  int(f.read())
     f.close()
+print "Receiver - Have pid: ", str(os.getpid())
 print "Receiver - Got pid: ", skipi_pid
 
 while os.path.isfile(PID_FILE):

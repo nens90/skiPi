@@ -44,7 +44,9 @@ LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 LED_STRIP      = ws.WS2811_STRIP_RGB   # Strip type and colour ordering
 LED_MODE_FILE  = '/var/led.mode'
 PID_FILE       = '/var/skipi.pid'
+
 LED_TIMEOUT    = 31 # seconds
+LED_MODE_MAX   = 12
 
 
 
@@ -144,6 +146,8 @@ if __name__ == '__main__':
             print "LED - Change to mode: ", led_mode
         elif ((time.time() - timestamp) > LED_TIMEOUT): # Timeout
             led_mode += 1 # Change mode
+            if led_mode > LED_MODE_MAX:
+                led_mode = 1
             last_led_mode = led_mode
             timestamp = time.time()
             print "LED - Timeout: New mode: ", led_mode
@@ -166,7 +170,7 @@ if __name__ == '__main__':
             rainbowCycle(strip)
         elif (led_mode == 9):
             theaterChaseRainbow(strip)
-        elif (led_mode == 99):
+        elif (led_mode == 10):
             colorWipe(strip, Color(0,0,0))
         else:
             theaterChaseRainbow(strip)
