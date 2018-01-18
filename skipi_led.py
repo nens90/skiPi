@@ -45,9 +45,8 @@ LED_STRIP      = ws.WS2811_STRIP_RGB   # Strip type and colour ordering
 LED_MODE_FILE  = '/var/led.mode'
 PID_FILE       = '/var/skipi.pid'
 
-LED_TIMEOUT    = 31 # seconds
-LED_MODE_MAX   = 12
-
+LED_TIMEOUT    = 15 # seconds
+LED_MODE_MAX   = 10
 
 
 # Define functions which animate LEDs in various ways.

@@ -1,12 +1,13 @@
 import socket
 import time
 
-UDP_IP = '<broadcast>'
+#UDP_IP = '<broadcast>'
+UDP_IP = "10.0.0.21"
 UDP_PORT = 5005
 MSG_MAX_LEN = 20
 RAND_MIN = 1
 RAND_MAX = 10
-LED_INTERVAL = 15 # seconds
+LED_INTERVAL = 5 # seconds
 
 print "Sender - UDP target IP:", UDP_IP
 print "Sender - UDP target port:", UDP_PORT
@@ -14,8 +15,8 @@ print "Sender - UDP target port:", UDP_PORT
 led_mode = RAND_MIN
 sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
-sock.bind(('', 0))
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+#sock.bind(('', 0))
+#sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 while True:
     #message = str(random.randint(RAND_MIN, RAND_MAX))
