@@ -50,6 +50,7 @@ def colorWipe(strip, color, wait_ms=50):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
+        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
             return
@@ -61,6 +62,7 @@ def theaterChase(strip, color, wait_ms=50, iterations=10):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, color)
             strip.show()
+            time.sleep(0.001)
             led_event.wait(wait_ms/1000.0)
             if (led_event.is_set()):
                 return
@@ -84,6 +86,7 @@ def rainbow(strip, wait_ms=20, iterations=1):
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, wheel((i+j) & 255))
         strip.show()
+        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
             return
@@ -94,6 +97,7 @@ def rainbowCycle(strip, wait_ms=20, iterations=5):
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
+        time.sleep(0.001)
         led_event.wait(wait_ms/1000.0)
         if (led_event.is_set()):
             return
@@ -105,6 +109,7 @@ def theaterChaseRainbow(strip, wait_ms=50):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, wheel((i+j) % 255))
             strip.show()
+            time.sleep(0.001)
             led_event.wait(wait_ms/1000.0)
             if (led_event.is_set()):
                 return
@@ -159,6 +164,7 @@ def led_thread(threadname):
             colorWipe(strip, Color(0,0,0))
         else:
             theaterChaseRainbow(strip)
+        time.sleep(0.02)
     colorWipe(strip, Color(0,0,0))
     
     
@@ -178,7 +184,7 @@ def nwk_thread(threadname):
             data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
             if data:
                 led_mode = int(data)
-                #led_event.set()
+                led_event.set()
                 print "Data: ", led_mode
                 
 
