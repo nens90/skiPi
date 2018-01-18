@@ -14,20 +14,11 @@ import sys
 import os
 
 from threading import Event
+from threading import Thread
 
-led_event = Event()
-
-led_mode = 1
-
-def signal_stop_handler(signal, frame):
-    led_mode = 0
-    led_event.set()
-
-def signal_network_handler(signal, frame):
-    with open(LED_MODE_FILE, 'r') as f:
-        led_mode = int(f.read())
-        f.close()
-        led_event.set()
+# Network
+import select
+import socket
 
 
 # LED strip configuration:
@@ -42,12 +33,12 @@ LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 LED_STRIP      = ws.WS2811_STRIP_RGB   # Strip type and colour ordering
-LED_MODE_FILE  = '/var/led.mode'
-PID_FILE       = '/var/skipi.pid'
 
 LED_TIMEOUT    = 15 # seconds
 LED_MODE_MAX   = 10
 
+UDP_PORT       = 5005
+MSG_MAX_LEN    = 20
 
 # Define functions which animate LEDs in various ways.
 def colorWipe(strip, color, wait_ms=50):
@@ -116,19 +107,8 @@ def theaterChaseRainbow(strip, wait_ms=50):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, 0)
 
-# Main program logic follows:
-if __name__ == '__main__':
-    with open(PID_FILE, 'w', 0) as fd:
-        fd.write(str(os.getpid()))
-        fd.write('\n')
-        fd.flush()
-        fd.close()
-    print "LED - Have pid: ", str(os.getpid())
-    
-
-    signal.signal(signal.SIGINT, signal_stop_handler)
-    signal.signal(signal.SIGUSR1, signal_network_handler)
-
+                
+led_thread(threadname):
     # Create NeoPixel object with appropriate configuration.
     strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
     # Intialize the library (must be called once before other functions).
@@ -173,5 +153,37 @@ if __name__ == '__main__':
             colorWipe(strip, Color(0,0,0))
         else:
             theaterChaseRainbow(strip)
-    os.remove(PID_FILE)
     colorWipe(strip, Color(0,0,0))
+    
+    
+nwk_thread(threadname):
+    global led_mode
+    global led_event
+    led_mode = 1
+    led_event = Event()
+
+    sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
+    sock.setblocking(0)
+    print "\nReceiver - Opening port for ", str(sys.argv[1])
+    sock.bind((str(sys.argv[1]), UDP_PORT)) # needs access to google dns
+    
+    while led_mode != 0:
+        # Network
+        ready = select.select([sock], [], [], 0) # Non-blocking
+        if ready[0]:
+            data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
+            if data:
+                led_mode = int(data)
+                led_event.set()
+                
+
+# Main program logic follows:
+if __name__ == '__main__':
+    nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
+    led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
+
+    nwk_thread.join()
+    led_thread.join()
+
+

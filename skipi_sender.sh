@@ -1,1 +1,1 @@
-python skipi_sender.py &
+python skipi_sender.py
