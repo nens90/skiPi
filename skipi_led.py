@@ -119,6 +119,7 @@ def theaterChaseRainbow(strip, wait_ms=50):
 if __name__ == '__main__':
     with open(PID_FILE, 'w') as fd:
         fd.write(str(os.getpid()))
+        fd.flush()
         fd.close()
 
     signal.signal(signal.SIGINT, signal_stop_handler)
