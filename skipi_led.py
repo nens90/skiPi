@@ -44,6 +44,7 @@ LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 LED_STRIP      = ws.WS2811_STRIP_RGB   # Strip type and colour ordering
 LED_MODE_FILE  = '/var/led.mode'
 PID_FILE       = '/var/skipi.pid'
+LED_TIMEOUT    = 31 # seconds
 
 
 
@@ -128,7 +129,19 @@ if __name__ == '__main__':
     # Intialize the library (must be called once before other functions).
     strip.begin()
 
+    last_led_mode = led_mode
+    timestamp = time.time()
+    
     while (led_mode != 0):
+        # Check timeout
+        if (last_led_mode != led_mode): # led mode changed. Update
+            timestamp = time.time()
+            last_led_mode = led_mode
+        elif ((time.time() - timestamp) > LED_TIMEOUT): # Timeout
+            led_mode += 1 # Change mode
+            last_led_mode = led_mode
+            timestamp = time.time()
+        # Find led mode
         if (led_mode == 1):
             colorWipe(strip, Color(255, 0, 0))  # Red wipe
         elif (led_mode == 2):
