@@ -1,2 +1,2 @@
-python skipi_led.py &
+sudo python skipi_led.py &
 python skipi_receiver.py &

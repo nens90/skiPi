@@ -50,6 +50,8 @@ yayay ayyayayy y
     git clone https://github.com/nens90/skiPi.git
     cd skiPi
     # Run the awesome app!
-    sudo python skipi.py
+    ./skipi.sh
+	
+### skiPi Sender ###  
 
-## Something else
+    ./skipi_sender.sh
