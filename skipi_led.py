@@ -108,7 +108,7 @@ def theaterChaseRainbow(strip, wait_ms=50):
                 strip.setPixelColor(i+q, 0)
 
                 
-led_thread(threadname):
+def led_thread(threadname):
     # Create NeoPixel object with appropriate configuration.
     strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
     # Intialize the library (must be called once before other functions).
@@ -156,7 +156,7 @@ led_thread(threadname):
     colorWipe(strip, Color(0,0,0))
     
     
-nwk_thread(threadname):
+def nwk_thread(threadname):
     global led_mode
     global led_event
     led_mode = 1
