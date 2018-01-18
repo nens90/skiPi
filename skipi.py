@@ -178,7 +178,7 @@ def nwk_thread(threadname):
     
     while led_mode != 0:
         # Network
-        ready = select.select([sock], [], [], 0) # Non-blocking
+        ready = select.select([sock], [], [], 0.010) # Non-blocking / wait 10 ms
         if ready[0]:
             data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
             if data:
