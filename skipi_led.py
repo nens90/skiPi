@@ -180,10 +180,11 @@ def nwk_thread(threadname):
 
 # Main program logic follows:
 if __name__ == '__main__':
-    nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
-    led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
+    nwk_thread = start_new_thread( target=nwk_thread, args=("Thread-Network", ) )
+    led_thread = start_new_thread( target=led_thread, args=("Thread-LED", ) )
 
     nwk_thread.start()
+    time.sleep(1)
     led_thread.start()
     
     nwk_thread.join()
