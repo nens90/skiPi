@@ -119,8 +119,11 @@ def theaterChaseRainbow(strip, wait_ms=50):
 if __name__ == '__main__':
     with open(PID_FILE, 'w') as fd:
         fd.write(str(os.getpid()))
+        fd.write('\n')
         fd.flush()
         fd.close()
+     print "LED have pid: ", str(os.getpid())
+    
 
     signal.signal(signal.SIGINT, signal_stop_handler)
     signal.signal(signal.SIGUSR1, signal_network_handler)

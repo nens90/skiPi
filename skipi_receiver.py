@@ -22,11 +22,11 @@ sock = socket.socket(socket.AF_INET, # Internet
 print "Opening port for ", str(sys.argv[1])
 sock.bind((str(sys.argv[1]), UDP_PORT)) # needs access to google dns
 
-time.sleep(0.5) # Wait for skipi.py to create a file with pid.
+time.sleep(10) # Wait for skipi.py to create a file with pid.
 with open(PID_FILE, 'r') as f:
     skipi_pid =  int(f.read())
     f.close()
-
+print "Receiver got pid: ", skipi_pid
 
 while os.path.isfile(PID_FILE):
     data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
