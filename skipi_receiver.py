@@ -3,6 +3,7 @@ import os
 import time
 import sys # To get ip_address from argv.
 import signal
+import select
 
 def get_ip_address():
     ip_address = '';
@@ -19,6 +20,7 @@ PID_FILE       = '/var/skipi.pid'
 
 sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
+sock.setblocking(0)
 # sock.bind((get_ip_address(), UDP_PORT)) # needs access to google dns
 print "\nReceiver - Opening port for ", str(sys.argv[1])
 sock.bind((str(sys.argv[1]), UDP_PORT)) # needs access to google dns
@@ -30,16 +32,22 @@ with open(PID_FILE, 'r') as f:
 print "Receiver - Have pid: ", str(os.getpid())
 print "Receiver - Got pid: ", skipi_pid
 
-sock.setblocking(0)
+sock.listen(5)
+inputs = [ sock ]
+outputs = [ ]
 
 while os.path.isfile(PID_FILE):
-    data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
-    if data:
-        with open(LED_MODE_FILE, 'w',0) as fd:
-            fd.write(data)
-            fd.write('\n')
-            fd.flush()
-            fd.close()
-            time.sleep(5)
-            os.kill(skipi_pid, signal.SIGUSR1)
-            print "Receiver - Got data: ", data
+    readable, writable, exceptional = select.select(inputs, outputs, inputs)
+    for s in readable:
+        if s is sock:
+            data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
+            if data:
+                with open(LED_MODE_FILE, 'w',0) as fd:
+                    fd.write(data)
+                    fd.write('\n')
+                    fd.flush()
+                    fd.close()
+                    time.sleep(5)
+                    os.kill(skipi_pid, signal.SIGUSR1)
+                    print "Receiver - Got data: ", data
+    print "test"
