@@ -117,7 +117,7 @@ def theaterChaseRainbow(strip, wait_ms=50):
 
 # Main program logic follows:
 if __name__ == '__main__':
-    with open(PID_FILE, 'w') as fd:
+    with open(PID_FILE, 'w', 0) as fd:
         fd.write(str(os.getpid()))
         fd.write('\n')
         fd.flush()
@@ -141,10 +141,12 @@ if __name__ == '__main__':
         if (last_led_mode != led_mode): # led mode changed. Update
             timestamp = time.time()
             last_led_mode = led_mode
+            print "LED: Change to mode: ", led_mode
         elif ((time.time() - timestamp) > LED_TIMEOUT): # Timeout
             led_mode += 1 # Change mode
             last_led_mode = led_mode
             timestamp = time.time()
+            print "LED: Timeout. New mode: ", led_mode
         # Find led mode
         if (led_mode == 1):
             colorWipe(strip, Color(255, 0, 0))  # Red wipe

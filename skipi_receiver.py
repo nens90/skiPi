@@ -26,12 +26,14 @@ time.sleep(10) # Wait for skipi.py to create a file with pid.
 with open(PID_FILE, 'r') as f:
     skipi_pid =  int(f.read())
     f.close()
-print "Receiver got pid: ", skipi_pid
+print "Receiver: Got pid: ", skipi_pid
 
 while os.path.isfile(PID_FILE):
     data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
-    with open(LED_MODE_FILE, 'w') as fd:
+    with open(LED_MODE_FILE, 'w',0) as fd:
         fd.write(data)
+        fd.write('\n')
+        fd.flush()
         fd.close()
     os.kill(skipi_pid, signal.SIGUSR1)
-    print "received message:", data
+    print "Receiver: Got data: ", data
