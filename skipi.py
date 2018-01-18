@@ -184,7 +184,7 @@ def nwk_thread(threadname):
 
 # Main program logic follows:
 if __name__ == '__main__':
-    print "PID: " os.getpid()
+    print "PID: ", os.getpid()
     nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
     led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
 
