@@ -2,6 +2,7 @@ import socket
 import os
 import time
 import sys # To get ip_address from argv.
+import signal
 
 def get_ip_address():
     ip_address = '';
