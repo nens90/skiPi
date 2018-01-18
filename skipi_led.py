@@ -122,7 +122,7 @@ if __name__ == '__main__':
         fd.write('\n')
         fd.flush()
         fd.close()
-     print "LED have pid: ", str(os.getpid())
+    print "LED - Have pid: ", str(os.getpid())
     
 
     signal.signal(signal.SIGINT, signal_stop_handler)
@@ -141,12 +141,12 @@ if __name__ == '__main__':
         if (last_led_mode != led_mode): # led mode changed. Update
             timestamp = time.time()
             last_led_mode = led_mode
-            print "LED: Change to mode: ", led_mode
+            print "LED - Change to mode: ", led_mode
         elif ((time.time() - timestamp) > LED_TIMEOUT): # Timeout
             led_mode += 1 # Change mode
             last_led_mode = led_mode
             timestamp = time.time()
-            print "LED: Timeout. New mode: ", led_mode
+            print "LED - Timeout: New mode: ", led_mode
         # Find led mode
         if (led_mode == 1):
             colorWipe(strip, Color(255, 0, 0))  # Red wipe

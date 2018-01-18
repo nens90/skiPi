@@ -19,14 +19,14 @@ PID_FILE       = '/var/skipi.pid'
 sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
 # sock.bind((get_ip_address(), UDP_PORT)) # needs access to google dns
-print "Opening port for ", str(sys.argv[1])
+print "\nReceiver - Opening port for ", str(sys.argv[1])
 sock.bind((str(sys.argv[1]), UDP_PORT)) # needs access to google dns
 
 time.sleep(10) # Wait for skipi.py to create a file with pid.
 with open(PID_FILE, 'r') as f:
     skipi_pid =  int(f.read())
     f.close()
-print "Receiver: Got pid: ", skipi_pid
+print "Receiver - Got pid: ", skipi_pid
 
 while os.path.isfile(PID_FILE):
     data, addr = sock.recvfrom(MSG_MAX_LEN) # buffer size is 20 bytes
@@ -36,4 +36,4 @@ while os.path.isfile(PID_FILE):
         fd.flush()
         fd.close()
     os.kill(skipi_pid, signal.SIGUSR1)
-    print "Receiver: Got data: ", data
+    print "Receiver - Got data: ", data
