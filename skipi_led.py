@@ -40,6 +40,11 @@ LED_MODE_MAX   = 10
 UDP_PORT       = 5005
 MSG_MAX_LEN    = 20
 
+
+
+led_mode = 1
+led_event = Event()
+
 # Define functions which animate LEDs in various ways.
 def colorWipe(strip, color, wait_ms=50):
     """Wipe color across display a pixel at a time."""
@@ -157,11 +162,6 @@ def led_thread(threadname):
     
     
 def nwk_thread(threadname):
-    global led_mode
-    global led_event
-    led_mode = 1
-    led_event = Event()
-
     sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
     sock.setblocking(0)
@@ -176,15 +176,16 @@ def nwk_thread(threadname):
             if data:
                 led_mode = int(data)
                 led_event.set()
+                print "Data: ", led_mode
                 
 
 # Main program logic follows:
 if __name__ == '__main__':
-    nwk_thread = start_new_thread( target=nwk_thread, args=("Thread-Network", ) )
-    led_thread = start_new_thread( target=led_thread, args=("Thread-LED", ) )
+    nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
+    led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
 
     nwk_thread.start()
-    time.sleep(1)
+    time.sleep(0.1)
     led_thread.start()
     
     nwk_thread.join()
