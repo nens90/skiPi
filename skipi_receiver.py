@@ -37,5 +37,6 @@ while os.path.isfile(PID_FILE):
         fd.write('\n')
         fd.flush()
         fd.close()
+    sleep(5)
     os.kill(skipi_pid, signal.SIGUSR1)
     print "Receiver - Got data: ", data
