@@ -41,7 +41,6 @@ UDP_PORT       = 5005
 MSG_MAX_LEN    = 20
 
 
-
 led_mode = 1
 led_event = Event()
 
@@ -114,6 +113,8 @@ def theaterChaseRainbow(strip, wait_ms=50):
 
                 
 def led_thread(threadname):
+    global led_mode
+    global led_event
     # Create NeoPixel object with appropriate configuration.
     strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
     # Intialize the library (must be called once before other functions).
@@ -162,6 +163,8 @@ def led_thread(threadname):
     
     
 def nwk_thread(threadname):
+    global led_mode
+    global led_event
     sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
     sock.setblocking(0)
@@ -181,6 +184,7 @@ def nwk_thread(threadname):
 
 # Main program logic follows:
 if __name__ == '__main__':
+    print "PID: " os.getpid()
     nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
     led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
 
