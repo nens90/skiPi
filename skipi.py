@@ -24,7 +24,7 @@ import socket
 # LED strip configuration:
 #    Looks like we have 30 leds/m, but a pixel consists of 3 leds.
 #    So with 10 pixels/m and 5 meter LED strip we must have 50 pixels.
-LED_COUNT      = 50      # Number of LED pixels. (default was 16)
+LED_COUNT      = 40      # Number of LED pixels. (default was 16)
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN       = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
