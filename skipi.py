@@ -195,6 +195,9 @@ def nwk_thread(threadname):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGABRT, signal_handler)
+    signal.signal(signal.SIGQUIT, signal_handler)
+    signal.signal(signal.SIGKILL, signal_handler)
 
     print "PID: ", os.getpid()
     nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
@@ -205,5 +208,5 @@ if __name__ == '__main__':
     led_thread.start()
     
     while led_mode != 0:
-        sleep(1)
+        time.sleep(1)
     print "Exiting..."
