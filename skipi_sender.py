@@ -24,7 +24,6 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGABRT, signal_handler)
 signal.signal(signal.SIGQUIT, signal_handler)
-signal.signal(signal.SIGKILL, signal_handler)
 
 led_mode = RAND_MIN
 sock = socket.socket(socket.AF_INET, # Internet
