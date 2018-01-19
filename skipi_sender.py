@@ -46,10 +46,10 @@ sock = socket.socket(socket.AF_INET, # Internet
 while True:
     #message = str(random.randint(RAND_MIN, RAND_MAX))
     message = str(led_mode)
-    for ip_addr in UDP_IPS: # Send to each IP that we now
-        if led_mode == 11:
-            wipe_but_one_mode()
-        else:
+    if led_mode == 11:
+        wipe_but_one_mode()
+    else:
+        for ip_addr in UDP_IPS: # Send to each IP that we now
             sock.sendto(message, (ip_addr, UDP_PORT))
     print "Sender - Sent: ", message
     time.sleep(LED_INTERVAL)
