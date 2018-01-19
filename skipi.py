@@ -45,7 +45,7 @@ led_mode = 1
 led_event = Event()
 
 def signal_handler(signal, frame):
-    global led_mode = 0
+    led_mode = 0
 
 
 # Define functions which animate LEDs in various ways.
@@ -209,3 +209,4 @@ if __name__ == '__main__':
     
     while led_mode != 0:
         sleep(1)
+    print "Exiting..."
