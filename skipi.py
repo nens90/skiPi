@@ -188,15 +188,13 @@ def nwk_thread(threadname):
             if data:
                 led_mode = int(data)
                 led_event.set()
-                print "Data: ", led_mode
+                #print "Data: ", led_mode
                 
 
 # Main program logic follows:
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGABRT, signal_handler)
-    signal.signal(signal.SIGQUIT, signal_handler)
 
     print "PID: ", os.getpid()
     nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
