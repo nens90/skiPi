@@ -1,9 +1,10 @@
 import socket
 import time
 import signal
+import sys
 
 #UDP_IP = '<broadcast>'
-UDP_IPS = ["10.0.0.21"]
+UDP_IPS = ["10.0.0.21", "10.0.0.23"]
 UDP_PORT = 5005
 MSG_MAX_LEN = 20
 RAND_MIN = 1
