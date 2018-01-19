@@ -2,7 +2,7 @@ import socket
 import time
 
 #UDP_IP = '<broadcast>'
-UDP_IP = "10.0.0.21"
+UDP_IPS = ["10.0.0.21"]
 UDP_PORT = 5005
 MSG_MAX_LEN = 20
 RAND_MIN = 1
@@ -21,7 +21,8 @@ sock = socket.socket(socket.AF_INET, # Internet
 while True:
     #message = str(random.randint(RAND_MIN, RAND_MAX))
     message = str(led_mode)
-    sock.sendto(message, (UDP_IP, UDP_PORT))
+    for ip_addr in UDP_IPS: # Send to each IP that we now
+        sock.sendto(message, (UDP_IP, UDP_PORT))
     print "Sender - Sent: ", message
     time.sleep(LED_INTERVAL)
     led_mode += 1
