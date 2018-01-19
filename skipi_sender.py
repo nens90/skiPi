@@ -24,7 +24,7 @@ def wipe_but_one_mode():
     for i in range(0, len(UDP_IPS)):
         if i == pi:
             sock.sendto(str(mode), (UDP_IPS[i], UDP_PORT))
-         else:
+        else:
             sock.sendto("10", (UDP_IPS[i], UDP_PORT))
     
         
