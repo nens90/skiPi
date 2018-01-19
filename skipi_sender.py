@@ -7,7 +7,7 @@ UDP_PORT = 5005
 MSG_MAX_LEN = 20
 RAND_MIN = 1
 RAND_MAX = 10
-LED_INTERVAL = 5 # seconds
+LED_INTERVAL = 10 # seconds
 
 print "Sender - UDP target IP:", UDP_IP
 print "Sender - UDP target port:", UDP_PORT

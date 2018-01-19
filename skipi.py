@@ -9,7 +9,6 @@ import time
 
 from neopixel import *
 
-import signal
 import sys
 import os
 
