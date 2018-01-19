@@ -11,6 +11,7 @@ from neopixel import *
 
 import sys
 import os
+import signal
 
 from threading import Event
 from threading import Thread
@@ -42,6 +43,11 @@ MSG_MAX_LEN    = 20
 
 led_mode = 1
 led_event = Event()
+
+def signal_handler(signal, frame):
+    led_mode = 0
+    sys.exit(0)
+
 
 # Define functions which animate LEDs in various ways.
 def colorWipe(strip, color, wait_ms=50):
@@ -188,6 +194,9 @@ def nwk_thread(threadname):
 
 # Main program logic follows:
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
     print "PID: ", os.getpid()
     nwk_thread = Thread( target=nwk_thread, args=("Thread-Network", ) )
     led_thread = Thread( target=led_thread, args=("Thread-LED", ) )
@@ -198,5 +207,6 @@ if __name__ == '__main__':
     
     nwk_thread.join()
     led_thread.join()
-
-
+    
+    while  led_mode != 0:
+        sleep(1)
