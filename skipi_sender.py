@@ -9,7 +9,7 @@ RAND_MIN = 1
 RAND_MAX = 10
 LED_INTERVAL = 10 # seconds
 
-print "Sender - UDP target IP:", UDP_IP
+print "Sender - UDP target IP:", UDP_IPS
 print "Sender - UDP target port:", UDP_PORT
 
 led_mode = RAND_MIN
@@ -22,7 +22,7 @@ while True:
     #message = str(random.randint(RAND_MIN, RAND_MAX))
     message = str(led_mode)
     for ip_addr in UDP_IPS: # Send to each IP that we now
-        sock.sendto(message, (UDP_IP, UDP_PORT))
+        sock.sendto(message, (ip_addr, UDP_PORT))
     print "Sender - Sent: ", message
     time.sleep(LED_INTERVAL)
     led_mode += 1
@@ -30,4 +30,4 @@ while True:
         led_mode = RAND_MIN
 #end
 message = "0"
-sock.sendto(message, (UDP_IP, UDP_PORT))
+sock.sendto(message, (ip_addr, UDP_PORT))
