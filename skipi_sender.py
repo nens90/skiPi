@@ -9,8 +9,17 @@ RAND_MIN = 1
 RAND_MAX = 10
 LED_INTERVAL = 10 # seconds
 
+def signal_handler(signal, frame):
+    message = "0"
+    for ip_addr in UDP_IPS: # Send to each IP that we now
+        sock.sendto(message, (ip_addr, UDP_PORT))
+    sys.exit(0)
+
 print "Sender - UDP target IP:", UDP_IPS
 print "Sender - UDP target port:", UDP_PORT
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 led_mode = RAND_MIN
 sock = socket.socket(socket.AF_INET, # Internet

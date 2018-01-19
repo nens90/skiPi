@@ -208,5 +208,5 @@ if __name__ == '__main__':
     nwk_thread.join()
     led_thread.join()
     
-    while  led_mode != 0:
+    while led_mode != 0:
         sleep(1)
