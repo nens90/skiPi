@@ -14,7 +14,7 @@ sudo apt-get install \
 echo "bcm2708_wdog" | sudo tee -a /etc/modules
 sudo cat <<EOT >> /etc/watchdog.conf
 watchdog-device	= /dev/watchdog
-watchdog-timeout = 60
+watchdog-timeout = 15
 interval = 5
 log-dir	= /var/log/watchdog
 realtime = yes
@@ -58,6 +58,8 @@ ip_addr=$(echo `ifconfig wlan0 2>/dev/null|awk '/inet / {print $2}'`)
 #echo Found IP: $ip_addr
 cmd_skipi="python -u /home/pi/skipi/skipi.py"
 log_skipi="/var/log/skipi.log"
+
+echo 1 > /dev/watchdog
 
 case "$1" in
   start)
