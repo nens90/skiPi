@@ -33,6 +33,7 @@ cd rpi_ws281x
 scons
 cd python
 sudo python setup.py install
+echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/snd-blacklist.conf
 
 # Install skipi
 cd ~/skipi
@@ -43,8 +44,8 @@ sudo cat <<EOT >> /etc/init.d/skipi
 ### BEGIN INIT INFO
 # Provides:          skipi
 # Short-Description: Start skipi
-# Required-Start:    $all
-# Required-Stop:     $all
+# Required-Start:    $local_fs $network $named $remote_fs
+# Required-Stop:     $local_fs $remote_fs
 # Should-Start:      
 # Should-Stop:       
 # Default-Start:     2 3 4 5
@@ -94,7 +95,7 @@ case "$1" in
     ;;
 
   *)
-    echo "Usage: /etc/init.d/skipi {start|stop|restart}"
+    echo "Usage: /etc/init.d/skipi {start|stop|force-stop|restart}"
     exit 1
 
 esac
