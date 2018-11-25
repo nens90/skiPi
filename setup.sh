@@ -1,13 +1,11 @@
 #!/usr/bin/env bash exou
 
 # Install packages
-sudo apt-get install \
+sudo apt-get install -y \
   python3-pip \
   build-essential \
   python-dev \
   git \
-  scons \
-  swig \
   watchdog
 
 # Setup watchdog
@@ -15,7 +13,7 @@ echo "bcm2708_wdog" | sudo tee -a /etc/modules
 sudo cat <<EOT >> /etc/watchdog.conf
 watchdog-device	= /dev/watchdog
 watchdog-timeout = 15
-interval = 5
+interval = 15
 log-dir	= /var/log/watchdog
 realtime = yes
 priority = 1
@@ -26,17 +24,14 @@ sudo sed -i 's/run_wd_keepalive=1/run_wd_keepalive=0/g' /etc/default/watchdog
 sudo update-rc.d -f watchdog remove
 sudo update-rc.d -f wd_keepalive remove
 
-# Install neopixel
-cd ~/
-git clone https://github.com/jgarff/rpi_ws281x.git
-cd rpi_ws281x
-scons
-cd python
-sudo python setup.py install
+# Install neopixel by adafriut
+sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
+
+# Blacklist audio module (interferes with PWM and PCM)
 echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/snd-blacklist.conf
 
 # Install skipi
-cd ~/skipi
+# Expected location: /home/pi/skipi/skipi.py
 sudo cat <<EOT >> /etc/init.d/skipi
 #!/bin/sh
 #/etc/init.d/skipi: start skipi.
@@ -57,7 +52,7 @@ handle_watchdog=0
 # Run command
 ip_addr=$(echo `ifconfig wlan0 2>/dev/null|awk '/inet / {print $2}'`)
 #echo Found IP: $ip_addr
-cmd_skipi="python -u /home/pi/skipi/skipi.py"
+cmd_skipi="/home/pi/skipi/skipi.py"
 log_skipi="/var/log/skipi.log"
 
 echo 1 > /dev/watchdog
@@ -67,7 +62,7 @@ case "$1" in
     if [ $handle_watchdog = 1 ]; then
         /etc/init.d/watchdog stop
     fi
-    nohup $cmd_skipi $ip_addr > $log_skipi & 
+    nohup $cmd_skipi > $log_skipi & 
     ;;
 
   stop)
@@ -91,7 +86,7 @@ case "$1" in
   restart)
     pid_skipi=$(pgrep -f "$cmd_skipi")
     kill -15 $pid_skipi
-    nohup $cmd_skipi $ip_addr > $log_skipi &
+    nohup $cmd_skipi > $log_skipi &
     ;;
 
   *)
