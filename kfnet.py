@@ -9,38 +9,43 @@ import signal
 
 import skibase
 
-import board
-import neopixel
+import select
+import socket
 
 
-
-# ============================= NeoPixel ====================================
+# ============================= Kesselfall Network ==========================
 # ----------------------------- Configuration -------------------------------
-LED_PIN_DEFAULT = 18
+UDP_PORT_DEFAULT = 5005
+UDP_MSG_MAX_LEN  = 20
 
 
 
 # ============================= argparse ====================================
-def args_add_ws281x(parser):
-    # ledpin
-    parser.add_argument( '-l', '--pin',
+def args_add_kfnet(parser):
+    # ip
+    parser.add_argument( '-a', '--ip',
+                         type=str,
+                         action="store",
+                         dest="ipaddress",
+                         default="auto",
+                         help="Specify IP address.")
+    # port
+    parser.add_argument( '-p', '--port',
                          type=int,
                          action="store",
-                         dest="ledpin",
-                         default=LED_PIN_DEFAULT,
-                         help="Set pin number that the data pin of the LED strip is connected to.")
-    # ledtype
-    
+                         dest="udpport",
+                         default=UDP_PORT_DEFAULT,
+                         help="Specify UDP listen port.")
     return parser
-
-
-
+    
+    
+    
 # ============================= Main ========================================
 def test():
     # Arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser = skibase.args_add_log(parser)
-    parser = args_add_ws281x(parser)
+    parser = args_add_kfnet(parser)
     args = parser.parse_args()
     
     # Parse

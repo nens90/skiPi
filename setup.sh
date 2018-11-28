@@ -25,7 +25,7 @@ sudo update-rc.d -f watchdog remove
 sudo update-rc.d -f wd_keepalive remove
 
 # Install neopixel by adafriut
-sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
+sudo pip3 install RPi.GPIO rpi_ws281x adafruit-circuitpython-neopixel
 
 # Blacklist audio module (interferes with PWM and PCM)
 echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/snd-blacklist.conf

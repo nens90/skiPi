@@ -95,9 +95,13 @@ def log_set_syslog(syslog):
     log_syslog = syslog
     log_debug("Set syslog to: %s" %syslog)
     
-    
+def log_config(level, syslog):
+    log_set_level(level)
+    log_set_syslog(syslog)
 
-# ----------------------------- argparse ------------------------------------
+    
+    
+# ============================= argparse ====================================
 def args_add_log(parser):
     # === Logging ===
     # loglevel
@@ -138,9 +142,8 @@ def test():
     parser = args_add_log(parser)
     args = parser.parse_args()
     
-    # Set logging
-    log_set_level(args.loglevel.upper())
-    log_set_syslog(args.syslog)
+    # Logger
+    log_config(args.loglevel.upper(), args.syslog)
     
     # Signal
     signal_setup([signal.SIGINT, signal.SIGTERM])

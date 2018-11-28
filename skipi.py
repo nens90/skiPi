@@ -11,8 +11,8 @@ import signal
 
 import skibase
 
-import KesselfallNet
-import WS281x
+import kfnet
+import ws281x
     
 
     
@@ -46,7 +46,7 @@ def wd_set_handle(handle):
     
     
 
-# ============================= argparse ====================================
+# ============================= argparse ====================================   
 def args_add_all(parser):
     # === Logging ===
     parser = skibase.args_add_log(parser)
@@ -58,9 +58,9 @@ def args_add_all(parser):
                          default=WD_HANDLE_DEFAULT,
                          help="Do not kick the watchdog; Disable watchdog handling.")
     # === Network ===
-    parser = KesselfallNet.args_add(parser)
+    parser = kfnet.args_add_kfnet(parser)
     # === WS281x ===
-    parser = WS281x.args_add(parser)
+    parser = ws281x.args_add_ws281x(parser)
     # === Tests ===
     # nettest
     parser.add_argument( '--nettest',
@@ -104,8 +104,7 @@ def main():
     args = parser.parse_args()
     
     # Parse
-    skibase.log_set_level(args.loglevel.upper())
-    skibase.log_set_syslog(args.syslog)
+    skibase.log_config(args.loglevel.upper(), args.syslog)
     
     # Watchdog
     wd_set_handle(args.watchdog)
