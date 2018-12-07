@@ -23,24 +23,28 @@ UDP_MSG_MAX_LEN  = 20
 # ============================= argparse ====================================
 def args_add_kfnet(parser):
     # ip
-    parser.add_argument( '-a', '--ip',
-                         type=str,
-                         action="store",
-                         dest="ipaddress",
-                         default="auto",
-                         help="Specify IP address.")
+    parser.add_argument(
+      '-a', '--ip',
+      type=str,
+      action="store",
+      dest="ipaddress",
+      default="auto",
+      help="Specify IP address."
+    )
     # port
-    parser.add_argument( '-p', '--port',
-                         type=int,
-                         action="store",
-                         dest="udpport",
-                         default=UDP_PORT_DEFAULT,
-                         help="Specify UDP listen port.")
+    parser.add_argument(
+      '-p', '--port',
+      type=int,
+      action="store",
+      dest="udpport",
+      default=UDP_PORT_DEFAULT,
+      help="Specify UDP listen port."
+    )
     return parser
     
     
     
-# ============================= Main ========================================
+# ============================= Unittest ====================================
 def test():
     # Arguments
     parser = argparse.ArgumentParser(description=__doc__)
@@ -54,9 +58,13 @@ def test():
     # Signal
     skibase.signal_setup([signal.SIGINT, signal.SIGTERM])
     
+    # Loop
+    skibase.log_info("Running Kesselfall network unittest")
     while not skibase.signal_counter:
         skibase.log_info(".", end='')
         time.sleep(0.8)
+
+    skibase.log_info("Running Kesselfall network unittest")
 
     
 if __name__ == '__main__':

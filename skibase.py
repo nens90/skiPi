@@ -105,18 +105,22 @@ def log_config(level, syslog):
 def args_add_log(parser):
     # === Logging ===
     # loglevel
-    parser.add_argument( '-d', '--loglevel',
-                         type=str,
-                         action="store",
-                         dest="loglevel",
-                         default=LOG_LEVEL_DEFAULT,
-                         help="Set log level :: DEBUG, INFO, NOTICE, WARNING, ERROR.")
+    parser.add_argument(
+      '-d', '--loglevel',
+      type=str,
+      action="store",
+      dest="loglevel",
+      default=LOG_LEVEL_DEFAULT,
+      help="Set log level :: DEBUG, INFO, NOTICE, WARNING, ERROR."
+    )
     # syslog
-    parser.add_argument( '--syslog',
-                         action="store_true",
-                         dest="syslog",
-                         default=False,
-                         help="Enable logging to syslog.")
+    parser.add_argument(
+      '--syslog',
+      action="store_true",
+      dest="syslog",
+      default=False,
+      help="Enable logging to syslog."
+    )
     return parser
     
     
@@ -135,7 +139,7 @@ def signal_setup(sigs):
 
 
 
-# ============================= Main ========================================
+# ============================= Unittest ====================================
 def test():
     # Parse arguments
     parser = argparse.ArgumentParser(description=__doc__)
@@ -156,14 +160,14 @@ def test():
     log_error("Error")
     
     # Loop
+    log_info("Running skibase unittest\n")
     counter = 0
     while not signal_counter:
         counter+=1
         log_info("%d" %counter)
         time.sleep(0.8)
         
-    # End
-    log_info("End\n")
+    log_info("skibase unittest ended\n")
     
 if __name__ == '__main__':
     test()
