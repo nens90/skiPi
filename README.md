@@ -60,3 +60,6 @@ yayay ayyayayy y
     curl -sS https://get.pimoroni.com/scrollphathd | bash
     
 [Follow example](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-scroll-phat-hd)
+
+### GPIOZERO ###
+    sudo apt install python3-gpiozero
