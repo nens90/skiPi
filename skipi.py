@@ -14,6 +14,7 @@ import skibase
 import wd
 import kfnet
 import ws281x
+import sphat
 
 
 
@@ -23,23 +24,37 @@ def args_add_all(parser):
     parser = skibase.args_add_log(parser)
     # === Watchdog ===
     parser = wd.args_add_wd(parser)
-    # === Network ===
+    # === Kesselfall Network ===
     parser = kfnet.args_add_kfnet(parser)
     # === WS281x ===
     parser = ws281x.args_add_ws281x(parser)
+    # === Scroll PHAT ===
+    parser = sphat.args_add_sphat(parser)
     # === Tests ===
     # nettest
-    parser.add_argument( '--nettest',
-                         action="store_true",
-                         dest="nettest",
-                         default=False,
-                         help="Run network-only test; Execute Kesselfall network without WS281x handling.")
+    #parser.add_argument( 
+    #  '--nettest',
+    #  action="store_true",
+    #  dest="nettest",
+    #  default=False,
+    #  help="Run network-only test; (not supported yet)"
+    #)
     # ledtest
-    parser.add_argument( '--ledtest',
-                         action="store_true",
-                         dest="ledtest",
-                         default=False,
-                         help="Run LED-only test; Execute WS281x without Kesselfall network handling.")
+    #parser.add_argument( 
+    #  '--ledtest',
+    #  action="store_true",
+    #  dest="ledtest",
+    #  default=False,
+    #  help="Run LED-only test; (not supported yet)"
+    #)
+    # ledtest
+    #parser.add_argument(
+    #  '--sphattest',
+    #  action="store_true",
+    #  dest="sphattest",
+    #  default=False,
+    #  help="Run sphat-only test; (not supported yet)"
+    #)
 
     return parser
 
@@ -78,9 +93,12 @@ def main():
     # Expect the main-loop to kick the watchdog again before time runs out.
     wd.wd_kick()
     
+    # Start scroll phat
+
     # Start LED strip (WS281x)
     
     # Start the Kesselfall network protocol
+    
     
     skibase.log_info("Running skipi")
     loop()

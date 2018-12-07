@@ -52,7 +52,8 @@ handle_watchdog=0
 # Run command
 ip_addr=$(echo `ifconfig wlan0 2>/dev/null|awk '/inet / {print $2}'`)
 #echo Found IP: $ip_addr
-cmd_skipi="/home/pi/skipi/skipi.py"
+cmd_skipi="python -u /home/pi/skipi/skipi.py"
+cmd_args="--ip $ip_addr"
 log_skipi="/var/log/skipi.log"
 
 echo 1 > /dev/watchdog
@@ -62,7 +63,7 @@ case "$1" in
     if [ $handle_watchdog = 1 ]; then
         /etc/init.d/watchdog stop
     fi
-    nohup $cmd_skipi > $log_skipi & 
+    nohup $cmd_skipi $cmd_args > $log_skipi & 
     ;;
 
   stop)
@@ -86,7 +87,7 @@ case "$1" in
   restart)
     pid_skipi=$(pgrep -f "$cmd_skipi")
     kill -15 $pid_skipi
-    nohup $cmd_skipi > $log_skipi &
+    nohup $cmd_skipi $cmd_args > $log_skipi &
     ;;
 
   *)
@@ -100,5 +101,8 @@ exit 0
 EOT
 sudo chmod +x /etc/init.d/skipi
 sudo update-rc.d skipi defaults
+
+# Set execute
+(cd /home/pi/skipi && sudo chmod +x skipi.py skibase.py wd.py ws281x.py kfnet.py sphat.py)
 
 echo "Setup complete!"
