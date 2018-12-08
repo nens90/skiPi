@@ -105,4 +105,11 @@ sudo update-rc.d skipi defaults
 # Set execute
 (cd /home/pi/skipi && sudo chmod +x skipi.py skibase.py wd.py ws281x.py kfnet.py sphat.py)
 
+# Enable multicast
+# Not necessary
+#sudo ip route add 224.0.8.0/24 dev wlan0
+
+# ad-hoc
+
+
 echo "Setup complete!"
