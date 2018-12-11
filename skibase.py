@@ -16,10 +16,15 @@ def die_err(msg):
     log_error(msg)
     sys.exit(1)
     
+
+start_time = 0
     
 def get_time_millis():
-    return int(round(time.time() * 1000))
+    return int(round(time.time() * 1000)) - start_time
     
+def set_time_start():
+    global time_start
+    time_start = get_time_millis()
     
     
 # ============================= Logging =====================================
