@@ -27,6 +27,12 @@ sudo update-rc.d -f wd_keepalive remove
 # Install neopixel by adafriut
 sudo pip3 install RPi.GPIO rpi_ws281x adafruit-circuitpython-neopixel
 
+# Install scroll phat HD
+curl -sS https://get.pimoroni.com/scrollphathd | bash
+
+# Install gpio zero for button control
+sudo apt install python3-gpiozero
+
 # Blacklist audio module (interferes with PWM and PCM)
 echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/snd-blacklist.conf
 
