@@ -10,17 +10,16 @@ import argparse
 import syslog
 
 
-
 # ============================= Common ======================================
 def die_err(msg):
     log_error(msg)
     sys.exit(1)
     
 
-start_time = 0
+time_start = 0
     
 def get_time_millis():
-    return int(round(time.time() * 1000)) - start_time
+    return int(round(time.time() * 1000)) - time_start
     
 def set_time_start():
     global time_start
