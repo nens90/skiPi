@@ -31,6 +31,10 @@ def args_add_all(parser):
     parser = ws281x.args_add_ws281x(parser)
     # === Scroll PHAT ===
     parser = sphat.args_add_sphat(parser)
+    # === Butt ===
+    
+    # === Main ===
+
     # === Tests ===
     # nettest
     #parser.add_argument( 
@@ -77,11 +81,10 @@ def loop(main_queue, kfnet_obj):
             data = None
         if data is not None:
             try:
-                packet = kfnet.KesselfallHeader.from_buffer_copy(data)
-                skibase.log_notice("-> Packet: %s :: data: %s" %\
-                  (packet.id.decode(), packet.data.decode()))
+                skibase.log_notice("# Program ID: %d" \
+                  %skibase.get_program_id_from_str(data))
             except:
-                skibase.log_warning("main got unknown data from kfnet")
+                skibase.log_warning("main got unknown data")
             main_queue.task_done()
 
 
@@ -119,7 +122,7 @@ def main():
                                   kfnet.MCAST_GRP, 
                                   args.ip_addr,
                                   args.mcast_port)
-                                  
+
     # Start button
     
 

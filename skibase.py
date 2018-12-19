@@ -10,6 +10,17 @@ import argparse
 import syslog
 
 
+PROGRAM_ID_LEN = 4
+PROGRAM_DEFAULT = 0
+PROGRAM_ID_MAX = 10
+
+def program_id_to_str(program_id):
+    return ("%%0%dd" %PROGRAM_ID_LEN) % program_id
+
+def get_program_id_from_str(data):
+    return int(data)
+
+    
 # ============================= Common ======================================
 def die_err(msg):
     log_error(msg)

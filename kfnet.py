@@ -22,7 +22,6 @@ import skibase
 
 KFNET_RETRANS_PROBABILITY = 190 # Probablitity of retransmission (0-255)
 KFNET_TTL_RETRANS = 5 # How many application-layer retransmissionss
-KFNET_DATA_MAX_LEN = 4
 KFNET_PACKET_ID_LEN = 4
 KFNET_PACKET_TIMEOUT_MS = 10000 # ms before received information is wiped
 KFNET_STX = 0x51
@@ -38,7 +37,7 @@ MCAST_PACKET_LEN  = (
   + 2  # src
   + 1  # ttl
   + 1  # rp
-  + KFNET_DATA_MAX_LEN  # data
+  + skibase.PROGRAM_ID_LEN  # data
   + 1  # etx
 )
 
@@ -135,7 +134,7 @@ class KesselfallHeader(ctypes.LittleEndianStructure):
       ("src", ctypes.c_uint16),  # Source ID (who originally created packet)
       ("ttl", ctypes.c_uint8),  # Packet TTL
       ("rp", ctypes.c_uint8),  # Probablitity to resend received packet
-      ("data", ctypes.c_char * KFNET_DATA_MAX_LEN),  # Data
+      ("data", ctypes.c_char * skibase.PROGRAM_ID_LEN),  # Data
       ("etx", ctypes.c_uint8),  # End byte
     ]
     
@@ -151,6 +150,8 @@ class KesselfallNetwork(threading.Thread):
     def __init__(self, main_queue,
                  interface, mcast_grp, ip_addr, mcast_port):
         super().__init__()
+        self.setName("KesselfallNetwork")
+        self.daemon = True
         self._main_queue = main_queue
         self._queue = queue.Queue()
         self.source_id = generate_source_id()
@@ -184,7 +185,7 @@ class KesselfallNetwork(threading.Thread):
             # Receive from network (to queue)
             packet = self._receive() # blocking
             if packet is not None:
-                self._main_queue.put(packet)
+                self._main_queue.put(packet.data.decode())
             # Check if p_to for p_id is timed out (once every X ms)
             t_now = skibase.get_time_millis()
             if t_now > t_next:
@@ -304,8 +305,6 @@ def kfnet_start(main_queue, interface,
     # Start KesselfallNetwork
     kfnet_obj = KesselfallNetwork(main_queue, interface,
                                   mcast_grp, ip_addr, mcast_port)
-    kfnet_obj.setName("KesselfallNetwork")
-    kfnet_obj.daemon = True
     kfnet_obj.start()
     return kfnet_obj
 
@@ -383,7 +382,7 @@ def test():
 
     # Loop (main)
     skibase.log_notice("Running Kesselfall network unittest")
-    counter = 0
+    counter = skibase.PROGRAM_DEFAULT
     t_next_send = skibase.get_time_millis()
     while not skibase.signal_counter and kfnet_obj.status():
         try:
@@ -392,9 +391,7 @@ def test():
             data = None
         if data is not None:
             try:
-                packet = KesselfallHeader.from_buffer_copy(data)
-                skibase.log_notice("-> Packet: %s :: data: %s" %\
-                  (packet.id.decode(), packet.data.decode()))
+                skibase.log_notice("-> data: %s" %data)
             except:
                 skibase.log_warning("kfnet got unknown data")
             main_queue.task_done()
@@ -402,7 +399,9 @@ def test():
             # Send packet to kfnet task
             # otherwise use kfnet_obj.queue_data(data)
             packet = kfnet_obj.create_packet()
-            packet.data = (("%d" %(counter%10)) * KFNET_DATA_MAX_LEN).encode()
+            packet.data = (
+              skibase.program_id_to_str(counter%(skibase.PROGRAM_ID_MAX+1))
+              ).encode()
             kfnet_obj.queue_packet(packet)
             skibase.log_notice("<- Packet: %s :: data: %s" %\
               (packet.id.decode(), packet.data.decode()))
