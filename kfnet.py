@@ -393,7 +393,7 @@ def test():
         if data is not None:
             try:
                 packet = KesselfallHeader.from_buffer_copy(data)
-                skibase.log_notice("<- Status: %s :: data: %s" %\
+                skibase.log_notice("-> Packet: %s :: data: %s" %\
                   (packet.id.decode(), packet.data.decode()))
             except:
                 skibase.log_warning("kfnet got unknown data")
@@ -404,7 +404,7 @@ def test():
             packet = kfnet_obj.create_packet()
             packet.data = (("%d" %(counter%10)) * KFNET_DATA_MAX_LEN).encode()
             kfnet_obj.queue_packet(packet)
-            skibase.log_notice("-> Status: %s :: data: %s" %\
+            skibase.log_notice("<- Packet: %s :: data: %s" %\
               (packet.id.decode(), packet.data.decode()))
             t_next_send = t_next_send \
                           + random.randint(CHANGE_RATE_MIN, CHANGE_RATE_MAX)

@@ -81,14 +81,14 @@ def test():
     wd_kick()
     
     # Loop
-    skibase.log_info("Running watchdog unittest")
+    skibase.log_notice("Running watchdog unittest")
     next_kick = 0
     while not skibase.signal_counter:
         next_kick = wd_check(next_kick)
         skibase.log_info(".", end='')
         time.sleep(0.8)
         
-    skibase.log_info("\nWatchdog unittest ended...")
+    skibase.log_notice("\nWatchdog unittest ended...")
 
     
 if __name__ == '__main__':

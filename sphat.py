@@ -37,12 +37,12 @@ def test():
     skibase.signal_setup([signal.SIGINT, signal.SIGTERM])
     
     # Loop
-    skibase.log_info("Running Scroll PHAT unittest")
+    skibase.log_notice("Running Scroll PHAT unittest")
     while not skibase.signal_counter:
         skibase.log_info(".", end='')
         time.sleep(0.8)
 
-    skibase.log_info("Scroll PHAT unittest ended")
+    skibase.log_notice("Scroll PHAT unittest ended")
 
     
 if __name__ == '__main__':

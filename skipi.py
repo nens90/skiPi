@@ -8,6 +8,7 @@ import sys
 import time
 import argparse
 import signal
+import queue
 
 import skibase
 
@@ -65,17 +66,29 @@ def args_add_all(parser):
 # ----------------------------- Loop ----------------------------------------
 LOOP_SPEED = 0.8
 
-def loop():
+def loop(main_queue, kfnet_obj):
     next_kick = 0
     
-    while not skibase.signal_counter:
+    while not skibase.signal_counter and kfnet_obj.status():
         next_kick = wd.wd_check(next_kick)
-        time.sleep(LOOP_SPEED)
-
+        try:
+            data = main_queue.get(block=True, timeout=LOOP_SPEED)
+        except queue.Empty:
+            data = None
+        if data is not None:
+            try:
+                packet = kfnet.KesselfallHeader.from_buffer_copy(data)
+                skibase.log_notice("-> Packet: %s :: data: %s" %\
+                  (packet.id.decode(), packet.data.decode()))
+            except:
+                skibase.log_warning("main got unknown data from kfnet")
+            main_queue.task_done()
 
 
 # ---------------------------------------------------------------------------
 def main():
+    skibase.set_time_start()
+    
     # Arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser = args_add_all(parser)
@@ -90,6 +103,9 @@ def main():
     # Signal
     skibase.signal_setup([signal.SIGINT, signal.SIGTERM])
     
+    # Start queue
+    main_queue = queue.Queue()
+    
     # Expect the main-loop to kick the watchdog again before time runs out.
     wd.wd_kick()
     
@@ -98,12 +114,23 @@ def main():
     # Start LED strip (WS281x)
     
     # Start the Kesselfall network protocol
+    kfnet_obj = kfnet.kfnet_start(main_queue,
+                                  args.interface,
+                                  kfnet.MCAST_GRP, 
+                                  args.ip_addr,
+                                  args.mcast_port)
+                                  
+    # Start button
     
-    
-    skibase.log_info("Running skipi")
-    loop()
-    skibase.log_info("\nskipi ended...")
 
+    # Run
+    skibase.log_notice("Running skipi")
+    loop(main_queue, kfnet_obj)
+    
+    # Stop
+    kfnet_obj = kfnet.kfnet_stop(kfnet_obj)
+    skibase.log_notice("\nskipi ended...")
+    
     
 if __name__ == '__main__':
     main()

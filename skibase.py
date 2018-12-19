@@ -164,14 +164,14 @@ def test():
     log_error("Error")
     
     # Loop
-    log_info("Running skibase unittest\n")
+    log_notice("Running skibase unittest\n")
     counter = 0
     while not signal_counter:
         counter+=1
         log_info("%d" %counter)
         time.sleep(0.8)
         
-    log_info("skibase unittest ended\n")
+    log_notice("skibase unittest ended\n")
     
 if __name__ == '__main__':
     test()
