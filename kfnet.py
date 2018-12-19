@@ -20,20 +20,9 @@ import queue
 import skibase
 
 
-BASE = 0x20
-TASK = {
-  "IN" : {
-    "STOP" : BASE + 0x00,   # 
-    "SEND" : BASE + 0x01,   # packet
-  },
-  "OUT" : {
-    "RECV" : BASE + 0x08,   # packet
-  }
-}
-
 KFNET_RETRANS_PROBABILITY = 190 # Probablitity of retransmission (0-255)
 KFNET_TTL_RETRANS = 5 # How many application-layer retransmissionss
-KFNET_DATA_MAX_LEN = 36
+KFNET_DATA_MAX_LEN = 4
 KFNET_PACKET_ID_LEN = 4
 KFNET_PACKET_TIMEOUT_MS = 10000 # ms before received information is wiped
 KFNET_STX = 0x51
@@ -127,7 +116,7 @@ class McastListener(socket.socket):
                         mreq)
 
    def mcast_check_receive(self):
-        ready = select.select([self], [], [], 0.010) # Non-blocking, 10 ms
+        ready = select.select([self], [], [], 0.100) # Non-blocking, 100 ms
         if ready[0]:
             data, addr = self.recvfrom(MCAST_PACKET_LEN)
             if data:
@@ -186,24 +175,16 @@ class KesselfallNetwork(threading.Thread):
     # --- Loop ---
     def run(self):
         t_next = skibase.get_time_millis() + KFNET_PACKET_TIMEOUT_MS
-        while True:
+        while not self._got_stop_event():
             # Send to network (from queue)
             while self._queue.empty() is False:
-                task = self._queue.get()
-                if task[0] == TASK["IN"]["STOP"]:
-                    self.stop()
-                    break
-                elif task[0] == TASK["IN"]["SEND"]:
-                    packet = task[1]
-                    self._send(packet)
-                else:
-                    skibase.log_error("kfnet got unknown task: 0x%02x" %task[0])
-                    print(task)
+                packet = self._queue.get()
+                self._send(packet)
                 self._queue.task_done()
             # Receive from network (to queue)
-            packet = self._receive()
-            if packet:
-                self._main_queue.put([TASK["OUT"]["RECV"], packet])
+            packet = self._receive() # blocking
+            if packet is not None:
+                self._main_queue.put(packet)
             # Check if p_to for p_id is timed out (once every X ms)
             t_now = skibase.get_time_millis()
             if t_now > t_next:
@@ -214,16 +195,19 @@ class KesselfallNetwork(threading.Thread):
                           % (p_id.decode(), p_to))
                         self._known_packet_ids.remove([p_to, p_id])
                 t_next = t_next + 1000
-            if self._got_stop_event():
-                break
         # Empty queue and stop
         while self._queue.empty() is False:
             self._queue.get()
             self._queue.task_done()
             
     # === Queue ===
-    def add_task(self, task):
-        self._queue.put(task)
+    def queue_data(self, data_string):
+        packet = self.create_packet()
+        packet.data = data_string.encode()
+        self.queue_packet(packet)
+        
+    def queue_packet(self, packet):
+        self._queue.put(packet)
         
     # === Network ===
     # --- Send ---
@@ -380,16 +364,16 @@ def test():
     parser = skibase.args_add_log(parser)
     parser = args_add_kfnet(parser)
     args = parser.parse_args()
-    
+
     # Parse
     skibase.log_config(args.loglevel.upper(), args.syslog)
-    
+
     # Signal
     skibase.signal_setup([signal.SIGINT, signal.SIGTERM])
-    
+
     # Start queue
     main_queue = queue.Queue()
-    
+
     # Start kfnet
     kfnet_obj = kfnet_start(main_queue,
                             args.interface,
@@ -402,21 +386,26 @@ def test():
     counter = 0
     t_next_send = skibase.get_time_millis()
     while not skibase.signal_counter and kfnet_obj.status():
-        t_now = skibase.get_time_millis()
-        while main_queue.empty() is False:
-                task = main_queue.get()
-                if task[0] == TASK["OUT"]["RECV"]:
-                    packet = KesselfallHeader.from_buffer_copy(task[1])
-                    skibase.log_notice("<- Status: %s" %packet.id.decode())
-                else:
-                    skibase.log_error("kfnet got unknown task: 0x%02x" %task[0])
-                main_queue.task_done()
-        if t_next_send < t_now:
+        try:
+            data = main_queue.get(block=True, timeout=0.25)
+        except queue.Empty:
+            data = None
+        if data is not None:
+            try:
+                packet = KesselfallHeader.from_buffer_copy(data)
+                skibase.log_notice("<- Status: %s :: data: %s" %\
+                  (packet.id.decode(), packet.data.decode()))
+            except:
+                skibase.log_warning("kfnet got unknown data")
+            main_queue.task_done()
+        if t_next_send < skibase.get_time_millis():
             # Send packet to kfnet task
+            # otherwise use kfnet_obj.queue_data(data)
             packet = kfnet_obj.create_packet()
             packet.data = (("%d" %(counter%10)) * KFNET_DATA_MAX_LEN).encode()
-            kfnet_obj.add_task([TASK["IN"]["SEND"], packet])
-            skibase.log_notice("-> Status: %s" %packet.id.decode())
+            kfnet_obj.queue_packet(packet)
+            skibase.log_notice("-> Status: %s :: data: %s" %\
+              (packet.id.decode(), packet.data.decode()))
             t_next_send = t_next_send \
                           + random.randint(CHANGE_RATE_MIN, CHANGE_RATE_MAX)
             counter += 1
