@@ -34,7 +34,15 @@ def args_add_all(parser):
     # === Butt ===
     
     # === Main ===
-
+    # Start program
+    parser.add_argument(
+      '-m', '--program',
+      type=int,
+      action="store",
+      dest="start_program",
+      default=skibase.PROGRAM_DEFAULT,
+      help="Starting Program ID. Default: %d" %skibase.PROGRAM_DEFAULT
+    )
     # === Tests ===
     # nettest
     #parser.add_argument( 

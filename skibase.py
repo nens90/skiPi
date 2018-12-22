@@ -8,17 +8,39 @@ import time
 import signal
 import argparse
 import syslog
+import threading
+import subprocess
+
+# ============================= Tasks =======================================
+DELAY_MUTLIPLEX = 0x00FF
+
+TASK_NET_SENT = 0x0ACC
+TASK_BUTTON_PRESS = 0xB077
+TASK_BUTTON_LONG = 0xDEAD
+TASK_DELAY_MS = 0xFF00  # multiplex with DELAY_MUTLIPLEX to get actual delay
+
+def shutdown_task():
+    subprocess.call("sudo nohup shutdown -h now", shell=True)
+
+def delay_task(task):
+    if task > TASK_DELAY_MS and task <= TASK_DELAY_MS+DELAY_MUTLIPLEX:
+        log_debug("Delay: %d ms" %(task&DELAY_MUTLIPLEX))
+        time.sleep((task&DELAY_MUTLIPLEX) / 1000)
 
 
+# ============================= Programs ====================================
 PROGRAM_ID_LEN = 4
 PROGRAM_DEFAULT = 0
-PROGRAM_ID_MAX = 10
+PROGRAM_ID_MAX = 3
 
 def program_id_to_str(program_id):
-    return ("%%0%dd" %PROGRAM_ID_LEN) % program_id
+    return ("%%0%xd" %PROGRAM_ID_LEN) % program_id
 
 def get_program_id_from_str(data):
     return int(data)
+    
+def get_next_program(program_id_now):
+    return program_id_now % (PROGRAM_ID_MAX+1)
 
     
 # ============================= Common ======================================
@@ -26,6 +48,24 @@ def die_err(msg):
     log_error(msg)
     sys.exit(1)
     
+class ThreadModule(threading.Thread):
+    def __init__(self, name):
+        super().__init__()
+        self.setName(name)
+        self.daemon = True
+        self._stop_event = threading.Event()
+        
+    def status(self):
+        return self.is_alive()
+                   
+    def stop(self):
+        self._stop_event.set()
+
+    def _got_stop_event(self):
+        return self._stop_event.is_set()
+
+    
+# ============================= Time ========================================
 
 time_start = 0
     

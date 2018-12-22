@@ -26,13 +26,12 @@ class Butt(threading.Thread):
     """
     
     # === Thread handling ===
-    def __init__(self, main_queue, start_program_id):
+    def __init__(self, main_queue):
         super().__init__()
         self.setName("Butt")
         self.daemon = True
         self._main_queue = main_queue
         self._stop_event = threading.Event()
-        self.program_counter = start_program_id
         
     def status(self):
         return self.is_alive()
@@ -47,8 +46,7 @@ class Butt(threading.Thread):
     def run(self):
         button = gpiozero.Button(BUTT_PIN,
                                  pull_up=True)
-                                 #bounce_time=0.005
-        
+
         while not self._got_stop_event():
             button.wait_for_press(timeout=0.500)
             if not button.is_pressed:
@@ -61,21 +59,18 @@ class Butt(threading.Thread):
             press_time = t_release - t_press
             
             if press_time >= LONG_PRESS_TIME:
-                skibase.log_debug("Long press")
+                self._main_queue.put(skibase.TASK_BUTTON_LONG)
+                skibase.log_debug("Button Long press")
                 if button.is_pressed:
                     button.wait_for_release(timeout=None)
             else:
-                skibase.log_debug("Press")
-                self.program_counter += 1
-                data = skibase.program_id_to_str(
-                  self.program_counter%(skibase.PROGRAM_ID_MAX+1)
-                )
-                self._main_queue.put(data)
+                self._main_queue.put(skibase.TASK_BUTTON_PRESS)
+                skibase.log_debug("Button Press")
 
 
 # ----------------------------- Handling ------------------------------------
-def butt_start(main_queue, start_program_id):
-    butt_obj = Butt(main_queue, start_program_id)
+def butt_start(main_queue):
+    butt_obj = Butt(main_queue)
     butt_obj.start()
     return butt_obj
 
@@ -89,17 +84,7 @@ def butt_stop(butt_obj):
 
 # ============================= argparse ====================================
 def args_add_butt(parser):
-    # Start program
-    parser.add_argument(
-      '-m', '--program',
-      type=int,
-      action="store",
-      dest="start_program",
-      default=skibase.PROGRAM_DEFAULT,
-      help="Starting Program ID. Default: %d" %skibase.PROGRAM_DEFAULT
-    )
     return parser
-
 
 
 # ============================= Unittest ====================================
@@ -120,20 +105,21 @@ def test():
     main_queue = queue.Queue()
     
     # Start Butt
-    butt_obj = butt_start(main_queue, args.start_program)
+    butt_obj = butt_start(main_queue)
     
     # Loop
     skibase.log_notice("Running butt unittest")
     while not skibase.signal_counter and butt_obj.status():
         try:
-            data = main_queue.get(block=True, timeout=0.25)
+            task = main_queue.get(block=True, timeout=0.25)
         except queue.Empty:
-            data = None
-        if data is not None:
-            try:
-                program_id = skibase.get_program_id_from_str(data)
-                skibase.log_notice("# Program ID: %d" %program_id)
-            except:
+            task = None
+        if task is not None:
+            if task == skibase.TASK_BUTTON_PRESS:
+                skibase.log_notice("butt press")
+            elif task == skibase.TASK_BUTTON_LONG:
+                skibase.log_notice("butt long press")
+            else:
                 skibase.log_warning("butt got unknown data")
         
     # Stop Butt
