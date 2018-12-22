@@ -9,39 +9,25 @@ import signal
 import argparse
 import syslog
 import threading
-import subprocess
+
 
 # ============================= Tasks =======================================
-DELAY_MUTLIPLEX = 0x00FF
+# All tasks must be within range 0x0000 to 0xFFFF.
+# This ensures that a task can be sent over the network as a uint32_t value
+TASK_MULTIPLEX = 0xFFFF
 
-TASK_NET_SENT = 0x0ACC
+MAJOR_TASK = 0xFF00
+MINOR_TASK = 0x00FF
+
 TASK_BUTTON_PRESS = 0xB077
 TASK_BUTTON_LONG = 0xDEAD
-TASK_DELAY_MS = 0xFF00  # multiplex with DELAY_MUTLIPLEX to get actual delay
+TASK_DELAY_MS = 0xBB00  # multiplex with MINOR_TASK to get actual delay
+# About programs:
+# To simplify the design programs are sent over the network as tasks.
+TASK_PROGRAM = 0xA500  # multiplex with MINOR_TASK to get program
 
-def shutdown_task():
-    subprocess.call("sudo nohup shutdown -h now", shell=True)
-
-def delay_task(task):
-    if task > TASK_DELAY_MS and task <= TASK_DELAY_MS+DELAY_MUTLIPLEX:
-        log_debug("Delay: %d ms" %(task&DELAY_MUTLIPLEX))
-        time.sleep((task&DELAY_MUTLIPLEX) / 1000)
-
-
-# ============================= Programs ====================================
-PROGRAM_ID_LEN = 4
-PROGRAM_DEFAULT = 0
-PROGRAM_ID_MAX = 3
-
-def program_id_to_str(program_id):
-    return ("%%0%xd" %PROGRAM_ID_LEN) % program_id
-
-def get_program_id_from_str(data):
-    return int(data)
-    
-def get_next_program(program_id_now):
-    return program_id_now % (PROGRAM_ID_MAX+1)
-
+def task_to_str(task):
+    return ("%04x" % task)
     
 # ============================= Common ======================================
 def die_err(msg):

@@ -20,27 +20,15 @@ LONG_PRESS_TIME = 2500
 
 
 # ============================= Butt ========================================
-class Butt(threading.Thread):
+class Butt(skibase.ThreadModule):
     """
     TODO
     """
     
     # === Thread handling ===
     def __init__(self, main_queue):
-        super().__init__()
-        self.setName("Butt")
-        self.daemon = True
+        super().__init__("Butt")
         self._main_queue = main_queue
-        self._stop_event = threading.Event()
-        
-    def status(self):
-        return self.is_alive()
-                   
-    def stop(self):
-        self._stop_event.set()
-
-    def _got_stop_event(self):
-        return self._stop_event.is_set()
         
     # --- Loop ---
     def run(self):
@@ -120,7 +108,7 @@ def test():
             elif task == skibase.TASK_BUTTON_LONG:
                 skibase.log_notice("butt long press")
             else:
-                skibase.log_warning("butt got unknown data")
+                skibase.log_warning("butt got unknown task")
         
     # Stop Butt
     butt_stop(butt_obj)
