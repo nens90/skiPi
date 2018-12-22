@@ -51,7 +51,7 @@ def get_program_from_task(task):
 
         
 # ============================= Programs ====================================
-PROGRAM_CHANGE_BLOCK_TIME_MS = 1000
+PROGRAM_CHANGE_BLOCK_MS = 5000
 PROGRAM_DEFAULT = 0
 PROGRAM_ID_MAX = 3
 
@@ -102,14 +102,15 @@ LOOP_SPEED = 0.8
 
 def loop(main_queue, program_id,
          kfnet_obj, butt_obj,
-         sphat_obj):
+         sphat_obj, ws281x_obj):
     next_kick = 0
     program_can_change_again = 0
     
     while not skibase.signal_counter \
       and kfnet_obj.status() \
       and butt_obj.status() \
-      and sphat_obj.status():
+      and sphat_obj.status() \
+      and ws281x_obj.status():
         next_kick = wd.wd_check(next_kick)
         try:
             task = main_queue.get(block=True, timeout=LOOP_SPEED)
@@ -117,14 +118,19 @@ def loop(main_queue, program_id,
             task = None
         if task:
             if task == skibase.TASK_BUTTON_PRESS:
-                program_id = get_next_program(program_id)
-                # Add program_id to kfnet as a task that is transmitted
-                # Do not execute task yet, but wait for kfnet to relay
-                # the task back when it is sent. This should make the
-                # network appear more "in sync".
-                kfnet_obj.queue_task(skibase.TASK_PROGRAM + program_id)
-                skibase.log_info("task: press: %s" % \
-                  program_id_to_str(program_id))
+                now = skibase.get_time_millis()
+                if now >= program_can_change_again:
+                    program_id = get_next_program(program_id)
+                    # Add program_id to kfnet as a task that is transmitted
+                    # Do not execute task yet, but wait for kfnet to relay
+                    # the task back when it is sent. This should make the
+                    # network appear more "in sync".
+                    kfnet_obj.queue_task(skibase.TASK_PROGRAM + program_id)
+                    skibase.log_info("task: press: %s" % \
+                      program_id_to_str(program_id))
+                    program_can_change_again = now + PROGRAM_CHANGE_BLOCK_MS
+                else:
+                    skibase.log_info("Ignoring program change.")
             elif task == skibase.TASK_BUTTON_LONG:
                 skibase.log_info("task: long press")
                 do_shutdown()
@@ -135,12 +141,8 @@ def loop(main_queue, program_id,
                 do_delay_task(task)
             elif (task & skibase.MAJOR_TASK) == skibase.TASK_PROGRAM:
                 program_id = get_program_from_task(task)
-                now = skibase.get_time_millis()
-                if now >= program_can_change_again:
-                    sphat_obj.program = program_id
-                    program_can_change_again = now + PROGRAM_CHANGE_BLOCK_TIME_MS
-                else:
-                    skibase.log_info("Ignoring program change.")
+                ws281x_obj.program = program_id
+                sphat_obj.program = program_id
                 skibase.log_notice("task: program: %s" % \
                   program_id_to_str(program_id))
             else:
@@ -181,7 +183,7 @@ def main():
     sphat_obj = sphat.sphat_start(args.start_program)
 
     # Start LED strip (WS281x)
-    
+    ws281x_obj = ws281x.ws281x_start(args.start_program, args.color)
     
     # Start the Kesselfall network protocol
     kfnet_obj = kfnet.kfnet_start(main_queue,
@@ -197,12 +199,13 @@ def main():
     skibase.log_notice("Running skipi")
     loop(main_queue, args.start_program,
          kfnet_obj, butt_obj,
-         sphat_obj)
+         sphat_obj, ws281x_obj)
     
     # Stop
     kfnet_obj = kfnet.kfnet_stop(kfnet_obj)
     butt_obj = butt.butt_stop(butt_obj)
     sphat_obj = sphat.sphat_stop(sphat_obj)
+    ws281x_obj = ws281x.ws281x_stop(ws281x_obj)
     # Empty queue and stop
     while main_queue.empty() is False:
         main_queue.get()
