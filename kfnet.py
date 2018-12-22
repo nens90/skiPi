@@ -7,7 +7,6 @@ import time
 import argparse
 import signal
 
-import threading
 import struct
 import fcntl
 import select
@@ -380,7 +379,7 @@ def test():
             task = main_queue.get(block=True, timeout=0.25)
         except queue.Empty:
             task = None
-        if task is not None:
+        if task:
             try:
                 skibase.log_notice("-> task: %s" %skibase.task_to_str(task))
             except:

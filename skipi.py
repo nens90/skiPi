@@ -40,7 +40,7 @@ def get_program_from_task(task):
     if task >= skibase.TASK_PROGRAM and \
        ((task & skibase.MAJOR_TASK) == skibase.TASK_PROGRAM):
         program = task & skibase.MINOR_TASK
-        skibase.log_debug("Program from task: %02x" % \
+        skibase.log_debug("Program from task: %s" % \
           program_id_to_str(program))
         return program
     else:
@@ -89,30 +89,6 @@ def args_add_all(parser):
       help="Starting Program ID. Default: %d" %PROGRAM_DEFAULT
     )
     # === Tests ===
-    # nettest
-    #parser.add_argument( 
-    #  '--nettest',
-    #  action="store_true",
-    #  dest="nettest",
-    #  default=False,
-    #  help="Run network-only test; (not supported yet)"
-    #)
-    # ledtest
-    #parser.add_argument( 
-    #  '--ledtest',
-    #  action="store_true",
-    #  dest="ledtest",
-    #  default=False,
-    #  help="Run LED-only test; (not supported yet)"
-    #)
-    # ledtest
-    #parser.add_argument(
-    #  '--sphattest',
-    #  action="store_true",
-    #  dest="sphattest",
-    #  default=False,
-    #  help="Run sphat-only test; (not supported yet)"
-    #)
 
     return parser
 
@@ -123,18 +99,21 @@ def args_add_all(parser):
 # ----------------------------- Loop ----------------------------------------
 LOOP_SPEED = 0.8
 
-def loop(main_queue, program_id, kfnet_obj, butt_obj):
+def loop(main_queue, program_id,
+         kfnet_obj, butt_obj,
+         sphat_obj):
     next_kick = 0
     
     while not skibase.signal_counter \
       and kfnet_obj.status() \
-      and butt_obj.status():
+      and butt_obj.status() \
+      and sphat_obj.status():
         next_kick = wd.wd_check(next_kick)
         try:
             task = main_queue.get(block=True, timeout=LOOP_SPEED)
         except queue.Empty:
             task = None
-        if task is not None:
+        if task:
             if task == skibase.TASK_BUTTON_PRESS:
                 program_id = get_next_program(program_id)
                 # Add program_id to kfnet as a task that is transmitted
@@ -154,9 +133,9 @@ def loop(main_queue, program_id, kfnet_obj, butt_obj):
                 do_delay_task(task)
             elif (task & skibase.MAJOR_TASK) == skibase.TASK_PROGRAM:
                 program_id = get_program_from_task(task)
+                sphat_obj.program = program_id
                 skibase.log_notice("task: program: %s" % \
                   program_id_to_str(program_id))
-                # todo handle new program
             else:
                 skibase.log_warning("skipi got unknown task!")
                 try:
@@ -192,8 +171,10 @@ def main():
     wd.wd_kick()
     
     # Start scroll phat
+    sphat_obj = sphat.sphat_start(args.start_program)
 
     # Start LED strip (WS281x)
+    
     
     # Start the Kesselfall network protocol
     kfnet_obj = kfnet.kfnet_start(main_queue,
@@ -207,11 +188,14 @@ def main():
 
     # Run
     skibase.log_notice("Running skipi")
-    loop(main_queue, args.start_program, kfnet_obj, butt_obj)
+    loop(main_queue, args.start_program,
+         kfnet_obj, butt_obj,
+         sphat_obj)
     
     # Stop
     kfnet_obj = kfnet.kfnet_stop(kfnet_obj)
     butt_obj = butt.butt_stop(butt_obj)
+    sphat_obj = sphat.sphat_stop(sphat_obj)
     # Empty queue and stop
     while main_queue.empty() is False:
         main_queue.get()

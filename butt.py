@@ -7,7 +7,6 @@ import time
 import argparse
 import signal
 import queue
-import threading
 
 import gpiozero
 
@@ -75,6 +74,7 @@ def args_add_butt(parser):
     return parser
 
 
+    
 # ============================= Unittest ====================================
 def test():
     # Arguments
