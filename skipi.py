@@ -51,6 +51,7 @@ def get_program_from_task(task):
 
         
 # ============================= Programs ====================================
+PROGRAM_CHANGE_BLOCK_TIME_MS = 1000
 PROGRAM_DEFAULT = 0
 PROGRAM_ID_MAX = 3
 
@@ -103,6 +104,7 @@ def loop(main_queue, program_id,
          kfnet_obj, butt_obj,
          sphat_obj):
     next_kick = 0
+    program_can_change_again = 0
     
     while not skibase.signal_counter \
       and kfnet_obj.status() \
@@ -133,7 +135,12 @@ def loop(main_queue, program_id,
                 do_delay_task(task)
             elif (task & skibase.MAJOR_TASK) == skibase.TASK_PROGRAM:
                 program_id = get_program_from_task(task)
-                sphat_obj.program = program_id
+                now = skibase.get_time_millis()
+                if now >= program_can_change_again:
+                    sphat_obj.program = program_id
+                    program_can_change_again = now + PROGRAM_CHANGE_BLOCK_TIME_MS
+                else:
+                    skibase.log_info("Ignoring program change.")
                 skibase.log_notice("task: program: %s" % \
                   program_id_to_str(program_id))
             else:
