@@ -40,7 +40,7 @@ class Sphat(skibase.ThreadModule):
                 scroll_string = "PROG3"
             else:
                 scroll_string = "ERROR%d" %last_program
-            skibase.log_info("program: %02x" %last_program)
+            skibase.log_info("sphat: %02x" %last_program)
             scrollphathd.clear()
             scrollphathd.write_string(scroll_string,
                                       brightness=BRIGHTNESS)

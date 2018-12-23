@@ -15,11 +15,11 @@ import neopixel
 
 
 # ============================= NeoPixel ====================================
-LED_PIN_DEFAULT = board.D12
-LED_COLOR_DEFAULT = "white"
-LED_ORDER_DEFAULT = neopixel.GRB
-LED_NUM_PIXELS = 100
-LED_BRIGHTNESS = 0.2
+NEO_PIN_DEFAULT = board.D12
+NEO_COLOR_DEFAULT = "white"
+NEO_ORDER_DEFAULT = neopixel.GRB
+NEO_NUM_PIXELS = 100
+NEO_BRIGHTNESS = 0.2
 
 WS281X_UPDATE_RATE_MS = 30
 
@@ -36,11 +36,11 @@ class Ws281x(skibase.ThreadModule):
         
     # --- Loop ---
     def run(self):
-        pixels = neopixel.NeoPixel(LED_PIN_DEFAULT,
-                                   LED_NUM_PIXELS,
-                                   brightness=LED_BRIGHTNESS, 
+        pixels = neopixel.NeoPixel(NEO_PIN_DEFAULT,
+                                   NEO_NUM_PIXELS,
+                                   brightness=NEO_BRIGHTNESS, 
                                    auto_write=False,
-                                   pixel_order=LED_ORDER_DEFAULT)
+                                   pixel_order=NEO_ORDER_DEFAULT)
         while not self._got_stop_event():
             last_program = self.program
             if last_program == 0x00:
@@ -53,11 +53,13 @@ class Ws281x(skibase.ThreadModule):
                 color = (255, 255, 0)
             else:
                 color = (255, 255, 255)
-            skibase.log_info("program: %02x" %last_program)
+            skibase.log_info("ws281x: %02x" %last_program)
             pixels.fill(color)
             while self.program == last_program and not self._got_stop_event():
                 pixels.show()
                 time.sleep(WS281X_UPDATE_RATE_MS / 1000)
+        pixels.fill((0, 0, 0)) # not stop fill with no color
+        
 
 
 # ----------------------------- Handling ------------------------------------
@@ -82,7 +84,7 @@ def args_add_ws281x(parser):
       type=int,
       action="store",
       dest="ledpin",
-      default=LED_PIN_DEFAULT,
+      default=NEO_PIN_DEFAULT,
       help="Pin number that the data pin of the LED strip is connected to."
     )
     # ledtype
@@ -93,8 +95,8 @@ def args_add_ws281x(parser):
       type=str,
       action="store",
       dest="color",
-      default=LED_COLOR_DEFAULT,
-      help="Default color of WS281x. (Default: %s)" %LED_COLOR_DEFAULT
+      default=NEO_COLOR_DEFAULT,
+      help="Default color of WS281x. (Default: %s)" %NEO_COLOR_DEFAULT
     )
     return parser
 

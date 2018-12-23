@@ -78,7 +78,9 @@ def args_add_all(parser):
     # === Scroll PHAT ===
     parser = sphat.args_add_sphat(parser)
     # === Butt ===
-    
+    parser = butt.args_add_butt(parser)
+    # === DbgLed ===
+    parser = dbgled.args_add_dbgled(parser)
     # === Main ===
     # Start program
     parser.add_argument(
@@ -89,8 +91,6 @@ def args_add_all(parser):
       default=PROGRAM_DEFAULT,
       help="Starting Program ID. Default: %d" %PROGRAM_DEFAULT
     )
-    # === Tests ===
-
     return parser
 
     
@@ -102,7 +102,7 @@ LOOP_SPEED = 0.8
 
 def loop(main_queue, program_id,
          kfnet_obj, butt_obj,
-         sphat_obj, ws281x_obj):
+         sphat_obj, ws281x_obj, dbgled_obj):
     next_kick = 0
     program_can_change_again = 0
     
@@ -110,7 +110,8 @@ def loop(main_queue, program_id,
       and kfnet_obj.status() \
       and butt_obj.status() \
       and sphat_obj.status() \
-      and ws281x_obj.status():
+      and ws281x_obj.status() \
+      and dbgled_obj.status():
         next_kick = wd.wd_check(next_kick)
         try:
             task = main_queue.get(block=True, timeout=LOOP_SPEED)
@@ -143,6 +144,7 @@ def loop(main_queue, program_id,
                 program_id = get_program_from_task(task)
                 ws281x_obj.program = program_id
                 sphat_obj.program = program_id
+                dbgled_obj.program = program_id
                 skibase.log_notice("task: program: %s" % \
                   program_id_to_str(program_id))
             else:
@@ -179,12 +181,12 @@ def main():
     # Expect the main-loop to kick the watchdog again before time runs out.
     wd.wd_kick()
     
+    # Start Debug LED
+    dbgled_obj = dbgled.dbgled_start(args.start_program, args.dbgpin)
     # Start scroll phat
     sphat_obj = sphat.sphat_start(args.start_program)
-
     # Start LED strip (WS281x)
     ws281x_obj = ws281x.ws281x_start(args.start_program, args.color)
-    
     # Start the Kesselfall network protocol
     kfnet_obj = kfnet.kfnet_start(main_queue,
                                   args.interface,
@@ -199,13 +201,14 @@ def main():
     skibase.log_notice("Running skipi")
     loop(main_queue, args.start_program,
          kfnet_obj, butt_obj,
-         sphat_obj, ws281x_obj)
+         sphat_obj, ws281x_obj, dbgled_obj)
     
     # Stop
     kfnet_obj = kfnet.kfnet_stop(kfnet_obj)
     butt_obj = butt.butt_stop(butt_obj)
     sphat_obj = sphat.sphat_stop(sphat_obj)
     ws281x_obj = ws281x.ws281x_stop(ws281x_obj)
+    dbgled_obj = dbgled.dbgled_stop(dbgled_obj)
     # Empty queue and stop
     while main_queue.empty() is False:
         main_queue.get()

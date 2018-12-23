@@ -34,6 +34,10 @@ def die_err(msg):
     log_error(msg)
     sys.exit(1)
     
+def dump(obj):
+    for attr in dir(obj):
+        print("obj.%s = %r" % (attr, getattr(obj, attr)))
+    
 class ThreadModule(threading.Thread):
     def __init__(self, name):
         super().__init__()
