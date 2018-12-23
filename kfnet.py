@@ -170,6 +170,8 @@ class KesselfallNetwork(skibase.ThreadModule):
                 # relay back the task that was sent.
                 # The main program will wait for the task to be relayed
                 # back before acting.
+                # Add delay before relaying
+                self._main_queue.put(skibase.TASK_DELAY_MS + 12)
                 self._main_queue.put(packet.task)
                 self._queue.task_done()
             # Receive from network (to queue)
