@@ -6,6 +6,7 @@ TODO
 import time
 import argparse
 import signal
+import random
 
 import skibase
 
@@ -16,12 +17,26 @@ import neopixel
 
 # ============================= NeoPixel ====================================
 NEO_PIN_DEFAULT = board.D12
-NEO_COLOR_DEFAULT = "white"
+NEO_COLOR_DEFAULT = "random"
 NEO_ORDER_DEFAULT = neopixel.GRB
 NEO_NUM_PIXELS = 100
 NEO_BRIGHTNESS = 0.2
 
 WS281X_UPDATE_RATE_MS = 30
+
+NEO_COLORS = {
+    "red"    = (255,   0,   0)
+    "green"  = (  0, 255,   0)
+    "blue"   = (  0,   0, 255)
+    "orange" = (255, 128, 128)
+    "purple" = (255,   0, 255)
+    "yellow" = (0,   255, 255)
+    "white"  = (255, 255, 255)
+    "random" = (random.randint(0,255),
+                random.randint(0,255),
+                random.randint(0,255))
+}
+
 
 class Ws281x(skibase.ThreadModule):
     """
@@ -29,10 +44,13 @@ class Ws281x(skibase.ThreadModule):
     """
     
     # === Thread handling ===
-    def __init__(self, start_program, default_color):
+    def __init__(self, start_program, default_color_str):
         super().__init__("WS281x")
         self.program = start_program
-        self.default_color = default_color
+        try:
+            self.default_color = NEO_COLORS[default_color_str]
+        except:
+            self.default_color = NEO_COLORS["random"]
         
     # --- Loop ---
     def run(self):
@@ -44,15 +62,15 @@ class Ws281x(skibase.ThreadModule):
         while not self._got_stop_event():
             last_program = self.program
             if last_program == 0x00:
-                color = (255, 0, 0)
+                color = self.default_color
             elif last_program == 0x01:
-                color = (0, 255, 0)
+                color = NEO_COLORS["red"]
             elif last_program == 0x02:
-                color = (0, 0, 255)
+                color = NEO_COLORS["green"]
             elif last_program == 0x03:
-                color = (255, 255, 0)
+                color = NEO_COLORS["blue"]
             else:
-                color = (255, 255, 255)
+                color = NEO_COLORS["random"]
             skibase.log_info("ws281x: %02x" %last_program)
             pixels.fill(color)
             while self.program == last_program and not self._got_stop_event():
