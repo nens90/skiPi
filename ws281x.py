@@ -8,13 +8,12 @@ import argparse
 import signal
 import random
 
-import skibase
-
 import board
 import neopixel
 
+import skibase
 
-
+    
 # ============================= NeoPixel ====================================
 NEO_PIN_DEFAULT = board.D12
 NEO_COLOR_DEFAULT = "random"
@@ -24,18 +23,43 @@ NEO_BRIGHTNESS = 0.2
 
 WS281X_UPDATE_RATE_MS = 30
 
-NEO_COLORS = {
-    "red"    = (255,   0,   0)
-    "green"  = (  0, 255,   0)
-    "blue"   = (  0,   0, 255)
-    "orange" = (255, 128, 128)
-    "purple" = (255,   0, 255)
-    "yellow" = (0,   255, 255)
-    "white"  = (255, 255, 255)
-    "random" = (random.randint(0,255),
-                random.randint(0,255),
-                random.randint(0,255))
+NEO_COLORS = { #  R    B    G
+    "none"   : (  0,   0,   0),
+    "red"    : (255,   0,   0),
+    "blue"   : (  0, 255,   0),
+    "green"  : (  0,   0, 255),
+    "orange" : (219,   0,  36),
+    "purple" : (129, 126,   0),
+    "pink"   : (198,  57,   0),
+    "yellow" : (174,   0,  81),
+    "cyan"   : (0,   102, 153),
+    "white"  : (127, 127, 127),
+    "random" : (random.randint(0,127),
+                random.randint(0,127),
+                random.randint(0,127))
 }
+
+
+def wheel(pos):
+    # Input a value 0 to 255 to get a color value.
+    # The colours are a transition r - g - b - back to r.
+    if pos < 0 or pos > 255:
+        r = g = b = 0
+    elif pos < 85:
+        r = int(pos * 3)
+        g = int(255 - pos*3)
+        b = 0
+    elif pos < 170:
+        pos -= 85
+        r = int(255 - pos*3)
+        g = 0
+        b = int(pos*3)
+    else:
+        pos -= 170
+        r = 0
+        g = int(pos*3)
+        b = int(255 - pos*3)
+    return (r, b, g)
 
 
 class Ws281x(skibase.ThreadModule):
@@ -44,42 +68,75 @@ class Ws281x(skibase.ThreadModule):
     """
     
     # === Thread handling ===
-    def __init__(self, start_program, default_color_str):
+    def __init__(self, start_program, default_color):
         super().__init__("WS281x")
         self.program = start_program
-        try:
-            self.default_color = NEO_COLORS[default_color_str]
-        except:
-            self.default_color = NEO_COLORS["random"]
+        if default_color in NEO_COLORS:
+            self.default_color = default_color
+        else:
+            self.default_color = "random"
         
+
     # --- Loop ---
     def run(self):
-        pixels = neopixel.NeoPixel(NEO_PIN_DEFAULT,
-                                   NEO_NUM_PIXELS,
-                                   brightness=NEO_BRIGHTNESS, 
-                                   auto_write=False,
-                                   pixel_order=NEO_ORDER_DEFAULT)
+        self.pixels = neopixel.NeoPixel(NEO_PIN_DEFAULT,
+                                        NEO_NUM_PIXELS,
+                                        brightness=NEO_BRIGHTNESS, 
+                                        auto_write=False,
+                                        pixel_order=NEO_ORDER_DEFAULT)
         while not self._got_stop_event():
             last_program = self.program
-            if last_program == 0x00:
-                color = self.default_color
-            elif last_program == 0x01:
-                color = NEO_COLORS["red"]
-            elif last_program == 0x02:
-                color = NEO_COLORS["green"]
-            elif last_program == 0x03:
-                color = NEO_COLORS["blue"]
-            else:
-                color = NEO_COLORS["random"]
             skibase.log_info("ws281x: %02x" %last_program)
-            pixels.fill(color)
-            while self.program == last_program and not self._got_stop_event():
-                pixels.show()
-                time.sleep(WS281X_UPDATE_RATE_MS / 1000)
-        pixels.fill((0, 0, 0)) # not stop fill with no color
+            if last_program == 0x00:
+                self.fill(self.default_color)
+                self.wait_event(last_program, 10)
+            elif last_program == 0x01:
+                self.fill("red")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x02:
+                self.fill("green")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x03:
+                self.fill("blue")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x04:
+                self.fill("orange")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x05:
+                self.fill("purple")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x06:
+                self.fill("yellow")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x07:
+                self.fill("cyan")
+                self.wait_event(last_program, 10)
+            elif last_program == 0x08:
+                self.rainbow()
+                self.wait_event(last_program, 10)
+            else:
+                self.fill("randow")
+                self.wait_event(last_program, 10)
+        # at stop fill with no color
+        self.pixels.fill(NEO_COLORS["none"])
+        self.pixels.show()
         
+        
+    def wait_event(self, program, delay_ms):
+        while self.program == program and not self._got_stop_event():
+            time.sleep(delay_ms / 1000)
+        
+    def fill(self, color):
+        self.pixels.fill(NEO_COLORS[color])
+        self.pixels.show()
+        
+    def rainbow(self):
+        for i in range(NEO_NUM_PIXELS):
+            pixel_index = (i * 256 // NEO_NUM_PIXELS)
+            self.pixels[i] = wheel(pixel_index & 255)
+        self.pixels.show()
 
-
+        
 # ----------------------------- Handling ------------------------------------
 def ws281x_start(start_program, default_color):
     ws281x_obj = Ws281x(start_program, default_color)
@@ -142,8 +199,8 @@ def test():
     skibase.log_notice("Running WS281x unittest")
     counter = 0
     while not skibase.signal_counter and ws281x_obj.status():
-        ws281x_obj.program = counter%4
-        time.sleep(5)
+        ws281x_obj.program = counter%9
+        time.sleep(3)
         counter += 1
 
     ws281x_obj = ws281x_stop(ws281x_obj)

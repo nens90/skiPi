@@ -38,6 +38,16 @@ class Sphat(skibase.ThreadModule):
                 scroll_string = "PROG2"
             elif last_program == 0x03:
                 scroll_string = "PROG3"
+            elif last_program == 0x04:
+                scroll_string = "PROG4"
+            elif last_program == 0x05:
+                scroll_string = "PROG5"
+            elif last_program == 0x06:
+                scroll_string = "PROG6"
+            elif last_program == 0x07:
+                scroll_string = "PROG7"
+            elif last_program == 0x08:
+                scroll_string = "PROG8"
             else:
                 scroll_string = "ERROR%d" %last_program
             skibase.log_info("sphat: %02x" %last_program)
@@ -92,7 +102,7 @@ def test():
     skibase.log_notice("Running Scroll PHAT unittest")
     counter = 0
     while not skibase.signal_counter and sphat_obj.status():
-        sphat_obj.program = counter%4
+        sphat_obj.program = counter%9
         time.sleep(8)
         counter += 1
 

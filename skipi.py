@@ -18,6 +18,7 @@ import kfnet
 import butt
 import ws281x
 import sphat
+import dbgled
 
 
 # ============================= Tasks =======================================
@@ -53,7 +54,7 @@ def get_program_from_task(task):
 # ============================= Programs ====================================
 PROGRAM_CHANGE_BLOCK_MS = 5000
 PROGRAM_DEFAULT = 0
-PROGRAM_ID_MAX = 3
+PROGRAM_ID_MAX = 8
 
 def program_id_to_str(program_id):
     return ("%02x" % program_id)
