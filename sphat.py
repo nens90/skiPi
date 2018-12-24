@@ -31,23 +31,23 @@ class Sphat(skibase.ThreadModule):
         while not self._got_stop_event():
             last_program = self.program
             if last_program == 0x00:
-                scroll_string = "PROG0"
+                scroll_string = "...!...0"
             elif last_program == 0x01:
-                scroll_string = "PROG1"
+                scroll_string = "...!...1"
             elif last_program == 0x02:
-                scroll_string = "PROG2"
+                scroll_string = "...!...2"
             elif last_program == 0x03:
-                scroll_string = "PROG3"
+                scroll_string = "...!...3"
             elif last_program == 0x04:
-                scroll_string = "PROG4"
+                scroll_string = "...!...4"
             elif last_program == 0x05:
-                scroll_string = "PROG5"
+                scroll_string = "...!...5"
             elif last_program == 0x06:
-                scroll_string = "PROG6"
+                scroll_string = "...!...6"
             elif last_program == 0x07:
-                scroll_string = "PROG7"
+                scroll_string = "...!...7"
             elif last_program == 0x08:
-                scroll_string = "PROG8"
+                scroll_string = "...!...8"
             else:
                 scroll_string = "ERROR%d" %last_program
             skibase.log_info("sphat: %02x" %last_program)
