@@ -24,7 +24,7 @@ import dbgled
 # ============================= Tasks =======================================
 def do_shutdown():
     skibase.log_notice("Calling shutdown")
-    cmd = "sudo nohup sh -c 'sleep 5; shutdown -h now' >/dev/null 2>&1 &"
+    cmd = "sudo nohup sh -c 'sleep 5 && shutdown -h now' >/dev/null 2>&1 &"
     subprocess.call(cmd, shell=True)
     wd.wd_kick()  # should work with a sleep of 5 seconds and a wd kick
 
@@ -205,6 +205,7 @@ def main():
          sphat_obj, ws281x_obj, dbgled_obj)
     
     # Stop
+    skibase.log_notice("Stopping skipi")
     kfnet_obj = kfnet.kfnet_stop(kfnet_obj)
     butt_obj = butt.butt_stop(butt_obj)
     sphat_obj = sphat.sphat_stop(sphat_obj)

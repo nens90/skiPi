@@ -118,8 +118,7 @@ class Ws281x(skibase.ThreadModule):
                 self.fill("randow")
                 self.wait_event(last_program, 10)
         # at stop fill with no color
-        self.pixels.fill(NEO_COLORS["none"])
-        self.pixels.show()
+        self.fill("none")
         
         
     def wait_event(self, program, delay_ms):
