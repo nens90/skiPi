@@ -1,3 +1,5 @@
+# Funktioner oversat fra https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
+
 # Simple test for NeoPixels on Raspberry Pi
 import time
 import board
