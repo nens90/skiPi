@@ -26,7 +26,7 @@ def do_shutdown():
     skibase.log_notice("Calling shutdown")
     cmd = "sudo nohup sh -c 'sleep 5 && shutdown -h now' >/dev/null 2>&1 &"
     subprocess.call(cmd, shell=True)
-    wd.wd_kick()  # should work with a sleep of 5 seconds and a wd kick
+    wd.wd_kick()  # should work with a sleep and a watchdog kick
 
 def do_delay_task(task):
     if task > skibase.TASK_DELAY_MS and \
