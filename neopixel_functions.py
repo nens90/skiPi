@@ -159,34 +159,30 @@ def theater_chase(red, green, blue, speedDelay):
 
     for j in range(0, 10): #do 10 cycles of chasing
         for q in range (0, 3):
-            for i in range (0, num_pixels-4, +3):
+            for i in range (0, num_pixels-3, +3):
                 pixels[i+q] = (red, green, blue) #turn every third pixel on
             pixels.show()
 
             time.sleep(speedDelay)
      
-            for i in range (0, num_pixels-4, +3):
+            for i in range (0, num_pixels-3, +3):
                 pixels[i+q] = (0, 0, 0) #turn every third pixel off
 
 
-# FIXME: Nedenstående funktion skal oversættes fra C til python
 def fade_to_black(ledNo, fadeValue):
     oldColor = pixels[ledNo]
-    print(oldColor)
-    r = (oldColor & 0x00ff0000UL) >> 16
-    g = (oldColor & 0x0000ff00UL) >> 8
-    b = (oldColor & 0x000000ffUL)
 
-    r=(r<=10)? 0 : (int) r-(r*fadeValue/256)
-    g=(g<=10)? 0 : (int) g-(g*fadeValue/256)
-    b=(b<=10)? 0 : (int) b-(b*fadeValue/256)
-    
+    r,g,b = oldColor
+
+    r = 0 if r <= 10 else int(r-(r*fadeValue/256))
+    g = 0 if g <= 10 else int(g-(g*fadeValue/256))
+    b = 0 if b <= 10 else int(b-(b*fadeValue/256))
+
     pixels[ledNo] = (r, g, b)
-
 def meteor_rain(red, green, blue, meteorSize, meteorTrailDecay, meteorRandomDecay, wait):
     pixels.fill((0, 0, 0))
 
-    for i in range(num_pixels+num_pixels):    
+    for i in range(num_pixels+num_pixels):
         # fade brightness all LEDs one step
         for j in range(num_pixels):
             if not meteorRandomDecay or random.randint(1,10)>5:
@@ -201,14 +197,14 @@ def meteor_rain(red, green, blue, meteorSize, meteorTrailDecay, meteorRandomDeca
         time.sleep(wait)
 
 while True:
-    rainbow_cycle(0.001)
-    color_wipe(0, 0, 255, 0.05)
-    fade_in_out(255, 0, 0)
-    strobe(55, 165, 0, 10, 0.05, 1)
-    twinkle(255, 165, 0, 20, 0.1, False)
-    twinkle_random(20, 0.1, False)
-    sparkle(165, 255, 0, 0)
-    snow_sparkle(16, 16, 16, 0.002, 0.5)
-    running_lights(255, 165, 0, 0.05)
-    theater_chase(255, 165, 0, 0.05)
-    meteor_rain(255, 165, 0, 10, 64, True, 30)
+    #rainbow_cycle(0.001)
+    #color_wipe(0, 0, 255, 0.05)
+    #fade_in_out(255, 0, 0)
+    #strobe(55, 165, 0, 10, 0.05, 1)
+    #twinkle(255, 165, 0, 20, 0.1, False)
+    #twinkle_random(20, 0.1, False)
+    #sparkle(165, 255, 0, 0)
+    #snow_sparkle(16, 16, 16, 0.002, 0.5)
+    #running_lights(255, 165, 0, 0.05)
+    #theater_chase(255, 165, 0, 0.05)
+    meteor_rain(255, 165, 0, 10, 64, True, 0.030)
