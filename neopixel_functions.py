@@ -5,19 +5,41 @@ import time
 import board
 import neopixel
 import random
+import math
 
 # Choose an open pin connected to the Data In of the NeoPixel strip, i.e. board.D18
 # NeoPixels must be connected to D10, D12, D18 or D21 to work.
 pixel_pin = board.D12
 
 # The number of NeoPixels
-num_pixels = 30
+num_pixels = 25
 
 # The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
 # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
 ORDER = neopixel.GRB
 
-pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.2, auto_write=False, pixel_order=ORDER)
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=1.0, auto_write=False, pixel_order=ORDER)
+
+def wheel(pos):
+    # Input a value 0 to 255 to get a color value.
+    # The colours are a transition r - g - b - back to r.
+    if pos < 0 or pos > 255:
+        r = g = b = 0
+    elif pos < 85:
+        r = int(pos * 3)
+        g = int(255 - pos*3)
+        b = 0
+    elif pos < 170:
+        pos -= 85
+        r = int(255 - pos*3)
+        g = 0
+        b = int(pos*3)
+    else:
+        pos -= 170
+        r = 0
+        g = int(pos*3)
+        b = int(255 - pos*3)
+    return (r, g, b) if ORDER == neopixel.RGB or ORDER == neopixel.GRB else (r, g, b, 0)
 
 def rainbow_cycle(wait):
     pixels.fill((0, 0, 0))
@@ -45,14 +67,14 @@ def fade_in_out(red, green, blue):
         r = (k/256.0)*red
         g = (k/256.0)*green
         b = (k/256.0)*blue
-        pixels.fill((r, g, b))
+        pixels.fill((int(r), int(g), int(b)))
         pixels.show()
 
     for k in range(255, 0, -2):
         r = (k/256.0)*red
         g = (k/256.0)*green
         b = (k/256.0)*blue
-        pixels.fill((r, g, b))
+        pixels.fill((int(r), int(g), int(b)))
         pixels.show()
 
 def strobe(red, green, blue, strobeCount, flashDelay, endPause):
@@ -72,7 +94,7 @@ def twinkle(red, green, blue, count, speedDelay, onlyOne):
     pixels.fill((0, 0, 0))
 
     for i in range(0, count):
-        pixels[random.randint(1,num_pixels)] = (red, green, blue)
+        pixels[random.randint(0,num_pixels-1)] = (red, green, blue)
         pixels.show()
         time.sleep(speedDelay);
         if onlyOne:
@@ -84,7 +106,7 @@ def twinkle_random(count, speedDelay, onlyOne):
     pixels.fill((0, 0, 0))
 
     for i in range(0, count):
-        pixels[random.randint(1,num_pixels)] = (random.randint(1,255), random.randint(1,255), random.randint(1,255))
+        pixels[random.randint(0,num_pixels-1)] = (random.randint(1,255), random.randint(1,255), random.randint(1,255))
         pixels.show()
         time.sleep(speedDelay)
         if onlyOne:
@@ -95,16 +117,16 @@ def twinkle_random(count, speedDelay, onlyOne):
 def sparkle(red, green, blue, speedDelay):
     pixels.fill((0, 0, 0))
 
-    pixel = random.randint(1, num_pixels)
+    pixel = random.randint(0, num_pixels-1)
     pixels[pixel] = (red, green, blue)
     pixels.show()
     time.sleep(speedDelay)
     pixels[pixel] = (0, 0, 0)
 
 def snow_sparkle(red, green, blue, sparkleDelay, speedDelay):
-    pixels.fill((0, 0, 0))
+    pixels.fill((red, green, blue))
 
-    pixel = random.randint(1, num_pixels)
+    pixel = random.randint(0, num_pixels-1)
     pixels[pixel] = (255, 255, 255)
     pixels.show()
     time.sleep(sparkleDelay)
@@ -125,43 +147,42 @@ def running_lights(red, green, blue, waveDelay):
         # float level = sin(i+Position) * 127 + 128;
         # setPixel(i,level,0,0);
         # float level = sin(i+Position) * 127 + 128;
-            pixels[i] = (((sin(i+Position) * 127 + 128)/255)*red, ((sin(i+Position) * 127 + 128)/255)*green, ((sin(i+Position) * 127 + 128)/255)*blue)
+            pixels[i] = (int(((math.sin(i+position) * 127 + 128)/255)*red),
+                         int(((math.sin(i+position) * 127 + 128)/255)*green),
+                         int(((math.sin(i+position) * 127 + 128)/255)*blue))
 
-    pixels.show()
-    time.sleep(waveDelay)
+        pixels.show()
+        time.sleep(waveDelay)
 
 def theater_chase(red, green, blue, speedDelay):
     pixels.fill((0, 0, 0))
 
     for j in range(0, 10): #do 10 cycles of chasing
         for q in range (0, 3):
-            for i in range (0, num_pixels, +3):
+            for i in range (0, num_pixels-3, +3):
                 pixels[i+q] = (red, green, blue) #turn every third pixel on
             pixels.show()
 
             time.sleep(speedDelay)
      
-            for i in range (0, num_pixels, +3):
+            for i in range (0, num_pixels-3, +3):
                 pixels[i+q] = (0, 0, 0) #turn every third pixel off
 
 
-# FIXME: Nedenstående funktion skal oversættes fra C til python
-# def fade_to_black(ledNo, fadeValue):
-#     oldColor = pixels[ledNo]
-#     r = (oldColor & 0x00ff0000UL) >> 16
-#     g = (oldColor & 0x0000ff00UL) >> 8
-#     b = (oldColor & 0x000000ffUL)
+def fade_to_black(ledNo, fadeValue):
+    oldColor = pixels[ledNo]
 
-#     r=(r<=10)? 0 : (int) r-(r*fadeValue/256)
-#     g=(g<=10)? 0 : (int) g-(g*fadeValue/256)
-#     b=(b<=10)? 0 : (int) b-(b*fadeValue/256)
-    
-#     pixels[ledNo] = (r, g, b)
+    r,g,b = oldColor
 
+    r = 0 if r <= 10 else int(r-(r*fadeValue/256))
+    g = 0 if g <= 10 else int(g-(g*fadeValue/256))
+    b = 0 if b <= 10 else int(b-(b*fadeValue/256))
+
+    pixels[ledNo] = (r, g, b)
 def meteor_rain(red, green, blue, meteorSize, meteorTrailDecay, meteorRandomDecay, wait):
     pixels.fill((0, 0, 0))
 
-    for i in range(num_pixels+num_pixels):    
+    for i in range(num_pixels+num_pixels):
         # fade brightness all LEDs one step
         for j in range(num_pixels):
             if not meteorRandomDecay or random.randint(1,10)>5:
@@ -176,14 +197,14 @@ def meteor_rain(red, green, blue, meteorSize, meteorTrailDecay, meteorRandomDeca
         time.sleep(wait)
 
 while True:
-    rainbow_cycle(0.001)
-    color_wipe(255, 165, 0, 0.001)
-    fade_in_out(255, 165, 0)
-    strobe(255, 165, 0, 10, 50, 1000)
-    twinkle(255, 165, 0, 20, 100, false)
-    twinkle_random(20, 100, false)
-    sparkle(255, 165, 0, 0)
-    snow_sparkle(16, 16, 16, 20, 500)
-    running_lights(255, 165, 0, 50)
-    theater_chase(255, 165, 0, 50)
-    #meteor_rain(255, 165, 0, 10, 64, True, 30)
+    #rainbow_cycle(0.001)
+    #color_wipe(0, 0, 255, 0.05)
+    #fade_in_out(255, 0, 0)
+    #strobe(55, 165, 0, 10, 0.05, 1)
+    #twinkle(255, 165, 0, 20, 0.1, False)
+    #twinkle_random(20, 0.1, False)
+    #sparkle(165, 255, 0, 0)
+    #snow_sparkle(16, 16, 16, 0.002, 0.5)
+    #running_lights(255, 165, 0, 0.05)
+    #theater_chase(255, 165, 0, 0.05)
+    meteor_rain(255, 165, 0, 10, 64, True, 0.030)
