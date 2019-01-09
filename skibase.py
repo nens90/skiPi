@@ -19,9 +19,9 @@ TASK_MULTIPLEX = 0xFFFF
 MAJOR_TASK = 0xFF00
 MINOR_TASK = 0x00FF
 
-TASK_BUTTON_PRESS_1 = 0xB076
-TASK_BUTTON_PRESS_2 = 0xB077
-TASK_BUTTON_LONG = 0xDEAD
+TASK_BUTTON_PRESS = 0xB077
+TASK_BUTTON_LONG_1 = 0xDEAC
+TASK_BUTTON_LONG_2 = 0xDEAD
 TASK_DELAY_MS = 0xBB00  # multiplex with MINOR_TASK to get actual delay
 # About programs:
 # To simplify the design programs are sent over the network as tasks.

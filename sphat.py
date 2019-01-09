@@ -62,7 +62,8 @@ class Sphat(skibase.ThreadModule):
             elif this_program == 0x08:
                 self.show_string(this_program, "...!...8")
             elif this_program == 0xff:
-                pass # do nothing as sphat is cleared
+                while self.program == this_program and not self._got_stop_event():
+                    pass # do nothing as sphat is cleared
             else:
                 scroll_string = "ERROR%d" %this_program
 
