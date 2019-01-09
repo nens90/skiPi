@@ -47,9 +47,10 @@ class Butt(skibase.ThreadModule):
             
             if press_time >= LONG_PRESS_TIME:
                 skibase.log_debug("Button Long press")
+                self._main_queue.put(skibase.TASK_BUTTON_LONG_1)
                 if button.is_pressed:
                     button.wait_for_release(timeout=None)
-                self._main_queue.put(skibase.TASK_BUTTON_LONG)
+                self._main_queue.put(skibase.TASK_BUTTON_LONG_2)
             else:
                 self._main_queue.put(skibase.TASK_BUTTON_PRESS)
                 skibase.log_debug("Button Press")

@@ -114,6 +114,9 @@ class Ws281x(skibase.ThreadModule):
             elif last_program == 0x08:
                 self.rainbow()
                 self.wait_event(last_program, 10)
+            elif last_program == 0xff:
+                self.fill("none")
+                self.wait_event(last_program, 10)
             else:
                 self.fill("randow")
                 self.wait_event(last_program, 10)

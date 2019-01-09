@@ -133,8 +133,12 @@ def loop(main_queue, program_id,
                     program_can_change_again = now + PROGRAM_CHANGE_BLOCK_MS
                 else:
                     skibase.log_info("Ignoring program change.")
-            elif task == skibase.TASK_BUTTON_LONG:
+            elif task == skibase.TASK_BUTTON_LONG_1:
                 skibase.log_info("task: long press")
+                ws281x_obj.program = 0xff
+                sphat_obj.program = 0xff                
+                dbgled_obj.program = 0xff
+            elif task == skibase.TASK_BUTTON_LONG_2:
                 do_shutdown()
                 main_queue.task_done()
                 break

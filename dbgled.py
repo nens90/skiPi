@@ -33,7 +33,9 @@ class DbgLed(skibase.ThreadModule):
         led = gpiozero.LED(self.ledpin)
         last_program = self.program
         while not self._got_stop_event():
-            if last_program != self.program:
+            if self.program == 0xff:
+                led.off()
+            elif last_program != self.program:
                 last_program = self.program
                 if last_program & 0x1:
                     led.on()
