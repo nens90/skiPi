@@ -169,24 +169,19 @@ def theater_chase(red, green, blue, speedDelay):
                 pixels[i+q] = (0, 0, 0) #turn every third pixel off
 
 
-def fade_to_black(ledNo, fadeValue):
-    oldColor = pixels[ledNo]
 
-    r,g,b = oldColor
-
-    r = 0 if r <= 10 else int(r-(r*fadeValue/256))
-    g = 0 if g <= 10 else int(g-(g*fadeValue/256))
-    b = 0 if b <= 10 else int(b-(b*fadeValue/256))
-
-    pixels[ledNo] = (r, g, b)
 def meteor_rain(red, green, blue, meteorSize, meteorTrailDecay, meteorRandomDecay, wait):
-    pixels.fill((0, 0, 0))
+    def fade_to_black((r,g,b), fadeValue):
+        r = 0 if r <= 10 else int(r-(r*fadeValue/256))
+        g = 0 if g <= 10 else int(g-(g*fadeValue/256))
+        b = 0 if b <= 10 else int(b-(b*fadeValue/256))
+        return (r, g, b)
 
     for i in range(num_pixels+num_pixels):
         # fade brightness all LEDs one step
-        for j in range(num_pixels):
+        for ledNo in range(num_pixels):
             if not meteorRandomDecay or random.randint(1,10)>5:
-                fade_to_black(j, meteorTrailDecay)
+                pixels[ledNo] = fade_to_black(pixels[ledNo], meteorTrailDecay)
 
         # draw meteor
         for j in range(meteorSize):
