@@ -54,7 +54,7 @@ def get_program_from_task(task):
 # ============================= Programs ====================================
 PROGRAM_CHANGE_BLOCK_MS = 5000
 PROGRAM_DEFAULT = 0
-PROGRAM_ID_MAX = 0x0A
+PROGRAM_ID_MAX = 0x0B
 
 def program_id_to_str(program_id):
     return ("%02x" % program_id)

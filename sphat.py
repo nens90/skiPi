@@ -44,27 +44,29 @@ class Sphat(skibase.ThreadModule):
             skibase.log_info("sphat: %02x" %this_program)
             scrollphathd.clear()
             if this_program == 0x00:
-                self.do_swirl(this_program)
+                self.show_string(this_program, "Kesselfall 2019 ")
             elif this_program == 0x01:
-                self.do_plasma(this_program)
+                self.do_storm(this_program)
             elif this_program == 0x02:
-                self.do_storm(this_program)
-            elif this_program == 0x03:
-                self.do_cells(this_program)
-            elif this_program == 0x04:
-                self.do_forest_fire(this_program)
-            elif this_program == 0x05:
                 self.do_graph(this_program)
-            elif this_program == 0x06:
-                self.show_string(this_program, "Kesselfall 2019")
-            elif this_program == 0x07:
-                self.do_swirl(this_program)
-            elif this_program == 0x08:
-                self.do_storm(this_program)
-            elif this_program == 0x09:
+            elif this_program == 0x03:
                 self.do_forest_fire(this_program)
-            elif this_program == 0x0A:
+            elif this_program == 0x04:
                 self.do_storm(this_program)
+            elif this_program == 0x05:
+                self.do_cells(this_program) 
+            elif this_program == 0x06:
+                self.show_string(this_program, "Kesselfall 2019 ")
+            elif this_program == 0x07:
+                self.do_forest_fire(this_program)
+            elif this_program == 0x08:
+                self.do_swirl(this_program)
+            elif this_program == 0x09:
+                self.do_plasma(this_program)
+            elif this_program == 0x0A:
+                self.do_swirl(this_program)
+            elif this_program == 0x0B:
+                self.do_plasma(this_program)
             elif this_program == 0xff:
                 while self.program == this_program and not self._got_stop_event():
                     pass # do nothing as sphat is cleared

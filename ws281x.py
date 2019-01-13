@@ -19,7 +19,7 @@ import skibase
 NEO_PIN_DEFAULT = board.D12
 NEO_COLOR_DEFAULT = "random"
 NEO_ORDER_DEFAULT = neopixel.GRB
-NEO_NUM_PIXELS = 100
+NEO_NUM_PIXELS = 25
 NEO_BRIGHTNESS = 0.2
 
 WS281X_UPDATE_RATE_MS = 30
@@ -69,38 +69,40 @@ class Ws281x(skibase.ThreadModule):
             self.pixels.fill((0, 0, 0))
             skibase.log_info("ws281x: %02x" %last_program)
             if last_program == 0x00:
-                self.sparkle(last_program, self.default_color, 0.005)
+                self.sparkle(last_program, *NEO_COLORS[self.default_color], 0.010, 0.5)
             elif last_program == 0x01:
-                self.snow_sparkle(last_program, self.default_color, 0.010, 0.25)
+                self.snow_sparkle(last_program, 0.010, 0.5)
             elif last_program == 0x02:
-                self.fill(self.default_color)
-                self.wait_event(last_program, 10)
+                self.color_wipe(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x03:
-                self.twinkle(last_program, self.default_color, 0.030)
+                self.twinkle(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x04:
-                self.strobe(last_program, self.default_color, 0.2, 10)
+                self.strobe(last_program, 255, 255, 255, 0.050)
             elif last_program == 0x05:
-                self.fade_in_out(last_program, self.default_color, 0.030)
+                self.fade_in_out(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x06:
-                self.color_wipe(last_program, self.default_color, 0.030)
+                self.constant_fill(*NEO_COLORS[self.default_color])
+                self.wait_event(last_program, 10)
             elif last_program == 0x07:
                 self.meteor_rain(last_program, 
-                                 self.default_color,
+                                 *NEO_COLORS[self.default_color],
                                  10, 64, True, 0.030)
             elif last_program == 0x08:
                 self.rainbow_cycle(last_program, 0.001)
             elif last_program == 0x09:
-                self.running_lights(last_program, self.default_color, 0.030)
+                self.running_lights(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x0A:
-                self.theater_chase(last_program, self.default_color, 0.030)
+                self.theater_chase(last_program, *NEO_COLORS[self.default_color], 0.030)
+            elif last_program == 0x0B:
+                self.random_flash(last_program, 255, 255, 255, 0.050)
             elif last_program == 0xff:
                 pass    # Already empty
                 self.wait_event(last_program, 10)
             else:
-                self.fill("randow")
+                self.constant_fill(*NEO_COLORS[self.default_color])
                 self.wait_event(last_program, 10)
         # at stop fill with no color
-        self.fill("none")
+        self.constant_fill(*NEO_COLORS["none"])
         
         
     def wait_event(self, program, delay_ms):
@@ -109,14 +111,14 @@ class Ws281x(skibase.ThreadModule):
         
         
     # ------------------------- Programs ------------------------------------
-    def fill(self, color):
-        self.pixels.fill(NEO_COLORS[color])
+    def constant_fill(self, r, g, b):
+        self.pixels.fill((r, g, b))
         self.pixels.show()
         
     def color_wipe(self, this_program,
-                   (red, green, blue), wait):
+                   red, green, blue, wait):
         while self.program == this_program and not self._got_stop_event():
-            self.fill("none")
+            self.pixels.fill((0, 0, 0))
             for i in range(NEO_NUM_PIXELS):
                 self.pixels[i] = (red, green, blue)
                 self.pixels.show()
@@ -126,7 +128,7 @@ class Ws281x(skibase.ThreadModule):
                     time.sleep(wait)
                     
     def fade_in_out(self, this_program, 
-                    (red, green, blue), wait):
+                    red, green, blue, wait):
         while self.program == this_program and not self._got_stop_event():
             time.sleep(wait)
             
@@ -136,6 +138,8 @@ class Ws281x(skibase.ThreadModule):
                 b = (k/256.0)*blue
                 self.pixels.fill((int(r), int(g), int(b)))
                 self.pixels.show()
+                if self.program != this_program or self._got_stop_event():
+                    break
 
             for k in range(255, 0, -2):
                 r = (k/256.0)*red
@@ -143,44 +147,53 @@ class Ws281x(skibase.ThreadModule):
                 b = (k/256.0)*blue
                 self.pixels.fill((int(r), int(g), int(b)))
                 self.pixels.show()
+                if self.program != this_program or self._got_stop_event():
+                    break
                 
     def strobe(self, this_program,
-               (red, green, blue),
-               flash_time, flash_delay):
+               red, green, blue,
+               flash_time):
+        while self.program == this_program and not self._got_stop_event():
+            self.pixels.fill((red, green, blue))
+            self.pixels.show()
+            time.sleep(flash_time/3)
+            self.pixels.fill((0, 0, 0))
+            self.pixels.show()
+            flash_delay = random.randint(50, 5000)
+            time.sleep(flash_time)
+                    
+    def random_flash(self, this_program,
+               red, green, blue,
+               flash_time):
         while self.program == this_program and not self._got_stop_event():
             self.pixels.fill((red, green, blue))
             self.pixels.show()
             time.sleep(flash_time)
             self.pixels.fill((0, 0, 0))
             self.pixels.show()
-            for i in range(WS281X_UPDATE_RATE_MS/flash_delay):
+            flash_delay = random.randint(50, 3000)
+            for i in range(int(flash_delay/WS281X_UPDATE_RATE_MS)):
                 if self.program != this_program or self._got_stop_event():
                     break
                 else:
-                    time.sleep(WS281X_UPDATE_RATE_MS)
+                    time.sleep(WS281X_UPDATE_RATE_MS/1000)
                     
     def twinkle(self, this_program,
-                (red, green, blue),
+                red, green, blue,
                 speedDelay, onlyOne = False):
         while self.program == this_program and not self._got_stop_event():
-            self.pixels[random.randint(0,NEO_NUM_PIXELS-1)] = (red, green, blue)
+            pixel = random.randint(0,NEO_NUM_PIXELS-1)
+            self.pixels[pixel] = (red, green, blue)
             self.pixels.show()
             time.sleep(speedDelay);
             if onlyOne:
                 self.pixels.fill((0, 0, 0))
+            if random.randint(0, NEO_NUM_PIXELS+1) >= NEO_NUM_PIXELS:
+                self.pixels.fill((0, 0, 0))
                 
     def sparkle(self, this_program,
-                (red, green, blue), speedDelay):
-        while self.program == this_program and not self._got_stop_event():
-            pixel = random.randint(0, NEO_NUM_PIXELS-1)
-            self.pixels[pixel] = (red, green, blue)
-            self.pixels.show()
-            time.sleep(speedDelay)
-            self.pixels[pixel] = (0, 0, 0)
-            
-    def snow_sparkle(self, this_program,
-                     (red, green, blue), 
-                     sparkleDelay, speedDelay):
+                red, green, blue, sparkleDelay, speedDelay):
+        self.pixels.fill((red, green, blue))
         while self.program == this_program and not self._got_stop_event():
             pixel = random.randint(0, NEO_NUM_PIXELS-1)
             self.pixels[pixel] = (255, 255, 255)
@@ -189,14 +202,17 @@ class Ws281x(skibase.ThreadModule):
             self.pixels[pixel] = (red, green, blue)
             self.pixels.show()
             
-            for i in range(WS281X_UPDATE_RATE_MS/speedDelay):
+            for i in range(int((speedDelay*1000)/WS281X_UPDATE_RATE_MS)):
                 if self.program != this_program or self._got_stop_event():
                     break
                 else:
-                    time.sleep(WS281X_UPDATE_RATE_MS)
+                    time.sleep(WS281X_UPDATE_RATE_MS/1000)
+            
+    def snow_sparkle(self, this_program, sparkleDelay, speedDelay):
+        self.sparkle(this_program, 75, 75, 75, sparkleDelay, speedDelay)
                     
     def running_lights(self, this_program,
-                       (red, green, blue), waveDelay):
+                       red, green, blue, waveDelay):
         while self.program == this_program and not self._got_stop_event():
             position = 0
             for j in range (0, NEO_NUM_PIXELS*2):
@@ -211,10 +227,13 @@ class Ws281x(skibase.ThreadModule):
                                       int(((math.sin(i+position) * 127 + 128)/255)*blue))
 
                 self.pixels.show()
-                time.sleep(waveDelay)
+                if self.program != this_program or self._got_stop_event():
+                    break
+                else:
+                    time.sleep(waveDelay)
         
     def theater_chase(self, this_program,
-                      (red, green, blue), speedDelay):
+                      red, green, blue, speedDelay):
         while self.program == this_program and not self._got_stop_event():
             for q in range (0, 3):
                 for i in range (0, NEO_NUM_PIXELS-3, +3):
@@ -262,10 +281,10 @@ class Ws281x(skibase.ThreadModule):
         
         
     def meteor_rain(self, this_program, 
-                    (red, green, blue),
+                    red, green, blue,
                     meteorSize, meteorTrailDecay, meteorRandomDecay,
                     wait):
-        def fade_to_black((r,g,b), fadeValue):
+        def fade_to_black(r,g,b, fadeValue):
             r = 0 if r <= 10 else int(r-(r*fadeValue/256))
             g = 0 if g <= 10 else int(g-(g*fadeValue/256))
             b = 0 if b <= 10 else int(b-(b*fadeValue/256))
@@ -276,7 +295,7 @@ class Ws281x(skibase.ThreadModule):
                 # fade brightness all LEDs one step
                 for ledNo in range(NEO_NUM_PIXELS):
                     if not meteorRandomDecay or random.randint(1,10)>5:
-                        self.pixels[ledNo] = fade_to_black(self.pixels[ledNo],
+                        self.pixels[ledNo] = fade_to_black(*self.pixels[ledNo],
                                                            meteorTrailDecay)
 
                 # draw meteor
