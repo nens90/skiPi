@@ -52,7 +52,7 @@ def get_program_from_task(task):
 
         
 # ============================= Programs ====================================
-PROGRAM_CHANGE_BLOCK_MS = 5000
+PROGRAM_CHANGE_BLOCK_MS = 15000
 PROGRAM_DEFAULT = 0
 PROGRAM_ID_MAX = 0x0B
 

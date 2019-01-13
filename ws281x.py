@@ -34,7 +34,7 @@ NEO_COLORS = { #  R    B    G
     "pink"   : (198,  57,   0),
     "yellow" : (174,   0,  81),
     "cyan"   : (0,   102, 153),
-    "white"  : (255, 255, 255),
+    "white"  : (150, 150, 150),
     "random" : (random.randint(0,127),
                 random.randint(0,127),
                 random.randint(0,127))
@@ -69,9 +69,9 @@ class Ws281x(skibase.ThreadModule):
             self.pixels.fill((0, 0, 0))
             skibase.log_info("ws281x: %02x" %last_program)
             if last_program == 0x00:
-                self.sparkle(last_program, *tuple(int(ti/4) for ti in NEO_COLORS[self.default_color]), 0.010, 0.7)
+                self.sparkle(last_program, *tuple(int(ti/4) for ti in NEO_COLORS[self.default_color]), 0.010, 2.0)
             elif last_program == 0x01:
-                self.snow_sparkle(last_program, 0.010, 0.7)
+                self.snow_sparkle(last_program, 0.010, 2.0)
             elif last_program == 0x02:
                 self.color_wipe(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x03:
