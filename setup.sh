@@ -10,7 +10,8 @@ sudo apt-get install -y \
 
 # Setup watchdog
 echo "bcm2708_wdog" | sudo tee -a /etc/modules
-sudo cat <<EOT >> /etc/watchdog.conf
+sudo su
+cat <<EOT > /etc/watchdog.conf
 watchdog-device	= /dev/watchdog
 watchdog-timeout = 15
 interval = 15
@@ -19,6 +20,7 @@ realtime = yes
 priority = 1
 
 EOT
+sudo su pi
 sudo sed -i 's/run_watchdog=1/run_watchdog=0/g' /etc/default/watchdog
 sudo sed -i 's/run_wd_keepalive=1/run_wd_keepalive=0/g' /etc/default/watchdog
 sudo update-rc.d -f watchdog remove
@@ -38,6 +40,7 @@ echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/snd-blacklist.conf
 
 # Install skipi
 # Expected location: /home/pi/skipi/skipi.py
+sudo su
 sudo cat <<EOT >> /etc/init.d/skipi
 #!/bin/sh
 #/etc/init.d/skipi: start skipi.
@@ -54,12 +57,12 @@ sudo cat <<EOT >> /etc/init.d/skipi
 ### END INIT INFO
 
 # Set handle_watchdog to 1 to start and stop the watchdog.
-handle_watchdog=0
+handle_watchdog=1
 # Run command
-ip_addr=$(echo `ifconfig wlan0 2>/dev/null|awk '/inet / {print $2}'`)
+#ip_addr=$(echo `ifconfig wlan0 2>/dev/null|awk '/inet / {print $2}'`)
 #echo Found IP: $ip_addr
 cmd_skipi="python -u /home/pi/skipi/skipi.py"
-cmd_args="--ip $ip_addr"
+cmd_args="--color white"
 log_skipi="/var/log/skipi.log"
 
 echo 1 > /dev/watchdog
@@ -105,11 +108,12 @@ esac
 exit 0
 
 EOT
+sudo su pi
 sudo chmod +x /etc/init.d/skipi
 sudo update-rc.d skipi defaults
 
 # Set execute
-(cd /home/pi/skipi && sudo chmod +x skipi.py skibase.py wd.py ws281x.py kfnet.py sphat.py)
+(cd /home/pi/skipi && sudo chmod +x skipi.py dbgled.py skibase.py wd.py ws281x.py kfnet.py sphat.py)
 
 # Enable multicast
 # Not necessary

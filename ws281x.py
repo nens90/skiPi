@@ -20,7 +20,7 @@ NEO_PIN_DEFAULT = board.D12
 NEO_COLOR_DEFAULT = "random"
 NEO_ORDER_DEFAULT = neopixel.GRB
 NEO_NUM_PIXELS = 25
-NEO_BRIGHTNESS = 0.2
+NEO_BRIGHTNESS = 1.0
 
 WS281X_UPDATE_RATE_MS = 30
 
@@ -34,7 +34,7 @@ NEO_COLORS = { #  R    B    G
     "pink"   : (198,  57,   0),
     "yellow" : (174,   0,  81),
     "cyan"   : (0,   102, 153),
-    "white"  : (127, 127, 127),
+    "white"  : (255, 255, 255),
     "random" : (random.randint(0,127),
                 random.randint(0,127),
                 random.randint(0,127))
@@ -69,13 +69,13 @@ class Ws281x(skibase.ThreadModule):
             self.pixels.fill((0, 0, 0))
             skibase.log_info("ws281x: %02x" %last_program)
             if last_program == 0x00:
-                self.sparkle(last_program, *NEO_COLORS[self.default_color], 0.010, 0.5)
+                self.sparkle(last_program, *tuple(int(ti/4) for ti in NEO_COLORS[self.default_color]), 0.010, 0.7)
             elif last_program == 0x01:
-                self.snow_sparkle(last_program, 0.010, 0.5)
+                self.snow_sparkle(last_program, 0.010, 0.7)
             elif last_program == 0x02:
                 self.color_wipe(last_program, *NEO_COLORS[self.default_color], 0.030)
             elif last_program == 0x03:
-                self.twinkle(last_program, *NEO_COLORS[self.default_color], 0.030)
+                self.twinkle_random(last_program, 0.030)
             elif last_program == 0x04:
                 self.strobe(last_program, 255, 255, 255, 0.050)
             elif last_program == 0x05:
@@ -96,7 +96,7 @@ class Ws281x(skibase.ThreadModule):
             elif last_program == 0x0B:
                 self.random_flash(last_program, 255, 255, 255, 0.050)
             elif last_program == 0xff:
-                pass    # Already empty
+                self.pixels.show()
                 self.wait_event(last_program, 10)
             else:
                 self.constant_fill(*NEO_COLORS[self.default_color])
@@ -178,12 +178,26 @@ class Ws281x(skibase.ThreadModule):
                 else:
                     time.sleep(WS281X_UPDATE_RATE_MS/1000)
                     
-    def twinkle(self, this_program,
+    def twinkle(self, this_program, 
                 red, green, blue,
                 speedDelay, onlyOne = False):
         while self.program == this_program and not self._got_stop_event():
             pixel = random.randint(0,NEO_NUM_PIXELS-1)
             self.pixels[pixel] = (red, green, blue)
+            self.pixels.show()
+            time.sleep(speedDelay);
+            if onlyOne:
+                self.pixels.fill((0, 0, 0))
+            if random.randint(0, NEO_NUM_PIXELS+1) >= NEO_NUM_PIXELS:
+                self.pixels.fill((0, 0, 0))
+                
+    def twinkle_random(self, this_program, speedDelay, onlyOne = False):
+        def random_color():
+            return NEO_COLORS[list(NEO_COLORS)[random.randint(0, len(NEO_COLORS)-1)]]
+       
+        while self.program == this_program and not self._got_stop_event():
+            pixel = random.randint(0,NEO_NUM_PIXELS-1)
+            self.pixels[pixel] = random_color()
             self.pixels.show()
             time.sleep(speedDelay);
             if onlyOne:
@@ -209,7 +223,7 @@ class Ws281x(skibase.ThreadModule):
                     time.sleep(WS281X_UPDATE_RATE_MS/1000)
             
     def snow_sparkle(self, this_program, sparkleDelay, speedDelay):
-        self.sparkle(this_program, 75, 75, 75, sparkleDelay, speedDelay)
+        self.sparkle(this_program, 20, 20, 20, sparkleDelay, speedDelay)
                     
     def running_lights(self, this_program,
                        red, green, blue, waveDelay):

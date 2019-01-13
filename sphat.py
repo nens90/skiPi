@@ -25,7 +25,7 @@ WIDTH = scrollphathd.DISPLAY_WIDTH
     
 # ============================= Scroll PHAT =================================
 SCROLL_TEXT_RATE_MS = 30
-BRIGHTNESS = 0.5
+BRIGHTNESS = 0.8
 
 class Sphat(skibase.ThreadModule):
     """
@@ -36,6 +36,7 @@ class Sphat(skibase.ThreadModule):
     def __init__(self, start_program):
         super().__init__("Sphat")
         self.program = start_program
+        scrollphathd.rotate(180)
         
     # --- Loop ---
     def run(self):
@@ -70,7 +71,7 @@ class Sphat(skibase.ThreadModule):
                     self.do_plasma(this_program)
                 elif this_program == 0xff:
                     while self.program == this_program and not self._got_stop_event():
-                        pass # do nothing as sphat is cleared
+                        scrollphathd.show()
                 else:
                     scroll_string = "ERROR%d" %this_program
             except:
